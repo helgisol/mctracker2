@@ -1,8 +1,9 @@
-distMapCalc <- function(obs)
+distMapCalc <- function(
+  obs, # Data frame wirh observations.
+  timeFactor = 0.01) # Time factor for time difference correction.
 {
   dm <- as.matrix(dist(cbind(obs$x, obs$y)))
   n <- nrow(obs)
-  #gMask <- outer(1:n, 1:n, function(i,j) obs$g[i] == obs$g[j]); dm[gMask] <- NA
   for(i in 1:n)
   {
     gi = obs$g[i]
@@ -11,7 +12,7 @@ distMapCalc <- function(obs)
     {
       if (i == j)
       {
-        dm[i,j] = - ri - obs$r[j]
+        dm[i,j] = - 2.0 * ri
       }
       else if (gi == obs$g[j])
       {
@@ -19,31 +20,9 @@ distMapCalc <- function(obs)
       }
       else
       {
-        dm[i,j] = dm[i,j] - ri - obs$r[j]
+        dm[i,j] = dm[i,j] - ri - (obs$r[j] + timeFactor * abs(obs$t[j] - obs$t[i]))
       }
     }
   }
   return(dm)
-
-  # Another variant of calculation.
-  d <- matrix(NA, n, n)
-  for(i in 1:(n-1))
-  {
-    gi = obs$g[i]
-    for(j in (i+1):n)
-    {
-      if (gi != obs$g[j])
-      {
-        d[i,j] = dm[i,j]
-      }
-    }
-  }
-  for(i in 2:n)
-  {
-    for(j in 1:(i-1))
-    {
-      d[i,j] = d[j,i]
-    }
-  }
-  return(d)
 }

@@ -3,6 +3,7 @@
 
 source('sampleObs.R')
 source('distMapCalc.R')
+source('clusterCenWeightMapCalc.R')
 source('distCalc.R')
 source('initSeedClustersCalc.R')
 source('seedClusterCalc.R')
@@ -17,14 +18,15 @@ tracker <- function(obs)
   n <- nrow(obs) # Number of points.
   xyInds <- which(colnames(obs) == c("x","y")) # Point coordinate indices in observation data frame.
   tol <- 1e-3 # Tolerance for mean shift process breaking.
+  w <- clusterCenWeightMapCalc(obs, d)
 
-  clusters <- clusterCalc(obs, d, n, xyInds, tol)
+  clusters <- clusterCalc(obs, d, w, n, xyInds, tol)
 }
 
-clusterCalc <- function(obs, d, n, xyInds, tol)
+clusterCalc <- function(obs, d, w, n, xyInds, tol)
 {
   p <- obs[,xyInds] # Point coordinates from observation data frame.
-  seedClusters <- initSeedClustersCalc(obs, p, d, tol)
+  seedClusters <- initSeedClustersCalc(obs, p, d, w, tol)
   clusters <- list()
   clusterCount <- 0
   isForceClustering <- FALSE
@@ -111,7 +113,7 @@ clusterCalc <- function(obs, d, n, xyInds, tol)
           {
             if (length(intersect(seedClusters$inds[[ind]], seedClusterInds)) != 0)
             {
-              seedClusters <- seedClusterCalc(seedClusters, obs, p, d, ind, tol)
+              seedClusters <- seedClusterCalc(seedClusters, obs, p, d, w, ind, tol)
             }
             else if (length(intersect(seedClusters$allInds[[ind]], seedClusterInds)) != 0)
             {

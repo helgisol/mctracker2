@@ -3,6 +3,7 @@ seedClusterCalc <- function(
   obs, # Observation data frame.
   p, # Point coordinates from observation data frame.
   d, # Distance map.
+  w, # Weight map for cluster center calculation.
   i, # Index of a seed point.
   tol) # Tolerance for mean shift process breaking.
 {
@@ -46,7 +47,8 @@ seedClusterCalc <- function(
       break
     }
     newClusterPts <- p[newClusterInds,] # Coordinates of new cluster's points.
-    newClusterCen <- clusterCenCalc(newClusterPts) # Coordinates of new cluster's center.
+    newClusterWs <- d[i,newClusterInds]
+    newClusterCen <- clusterCenCalc(newClusterPts, newClusterWs) # Coordinates of new cluster's center.
     if (distCalc(newClusterCen, origPt) > origMaxDist)
     {
       break
