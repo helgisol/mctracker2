@@ -1,10 +1,22 @@
-conflictingRankCalc <- function(g, clusterInds, clusterPts, clusterCen, clusterGroups)
+conflictingRankCalc <- function(
+  g,
+  p,
+  clusterInds,
+  clusterAllInds,
+  clusterCen) # Coordinates of cluster center (calculated for obly closest points in cluster)
 {
-  dists <- distCalc(clusterCen, clusterPts) # Distances between a cluster's center and all cluster's points.
-  cRank <- 0.0 # Current value of resulted cRank.
-  for (group in clusterGroups) # For each group of points in cluster.
+  if (identical(clusterInds, clusterAllInds))
   {
-    distsGroupped <- dists[obs$g[clusterInds] == group] # Select distances for only points from current group.
+    return(0.0)
+  }
+  cRank <- 0.0 # Current value of resulted cRank.
+  clusterAllPts <- p[clusterAllInds,] # Coordinates for every cluster points (conflicted points too).
+  dists <- distCalc(clusterCen, clusterAllPts) # Distances between a cluster's center and all cluster's points.
+  clusterGroups <- g[clusterAllInds] # Group index for every cluster points (conflicted points too).
+  clusterUniGroups <- unique(clusterGroups)
+  for (group in clusterUniGroups) # For each group of points in cluster.
+  {
+    distsGroupped <- dists[clusterGroups == group] # Select distances for only points from current group.
     if (length(distsGroupped) > 1) # Process only conflictiong groups.
     {
       distsGrouppedSorted <- sort(distsGroupped)

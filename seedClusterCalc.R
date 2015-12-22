@@ -4,29 +4,19 @@ seedClusterCalc <- function(
   p, # Point coordinates from observation data frame.
   d, # Distance map.
   i, # Index of a seed point.
-  initClusterInds = NA, # Inintial set of clusterindices.
-  doConflictEliminaton, # Flag for conflict eliminating (if TRUE, conflicted points are ignored, otherwise clastering breaks).
   tol) # Tolerance for mean shift process breaking.
 {
+#   if (i == 21)
+#   {
+#     a <- 1
+#   }
   origPt <- p[i,]
   origMaxDist <- 2 * obs$r[i]
   clusters$detached[i] = FALSE
-  clusters$cRank[i] = 0.0
-  clusters$prevInds[[i]] <- c(i)
-  if (is.na(initClusterInds))
-  {
-    clusterInds <- c(i)
-    clusterPts <- p[clusterInds,]
-    clusterCen <- origPt
-  }
-  else
-  {
-    stopifnot(doConflictEliminaton)
-    stopifnot(length(obs$g[initClusterInds]) == length(initClusterInds))
-    clusterInds <- initClusterInds
-    clusterPts <- p[clusterInds,]
-    clusterCen <- clusterCenCalc(clusterPts)
-  }
+  clusterAllInds <- c(i)
+  clusterInds <- c(i)
+  clusterPts <- p[clusterInds,]
+  clusterCen <- origPt
   repeat
   {
     origShift <- distCalc(origPt, clusterCen) # Distance between original point and cluster's center.
@@ -34,17 +24,26 @@ seedClusterCalc <- function(
     posClusterPts <- p[posClusterInds,] # Coordinates of potential cluster points.
     dists <- distCalc(clusterCen, posClusterPts) # Distances to cluster's center from all potential cluster's points.
     dists <- (dists - obs$r[i]) - obs$r[posClusterInds] # Distances, corrected by point radii.
-    newClusterInds <- posClusterInds[which(dists <= 0.0)]  # Indices (in global point list).
-    if (doConflictEliminaton)
+    newClusterAllInds <- posClusterInds[which(dists <= 0.0)]  # Indices (in global point list) of all cluster points.
+    clusterGroups <- obs$g[newClusterAllInds]
+    if (length(unique(clusterGroups)) == length(newClusterAllInds)) # If there are no conflicted points in cluster.
     {
-      clusterGroups <- obs$g[newClusterInds]
-      if (length(unique(clusterGroups)) != length(newClusterInds))
+      newClusterInds <- newClusterAllInds  # Indices (in global point list) of only closes from conflicting points.
+    }
+    else
+    {
+      dists <- dists[which(dists <= 0.0)] # Distances for only points in cluster.
+      distOrder <- order(dists)
+      filterPosClusterLocInds <- distOrder[!duplicated(clusterGroups[distOrder])]
+      newClusterInds <- sort(newClusterAllInds[filterPosClusterLocInds])
+    }
+    if (identical(clusterInds, newClusterInds))
+    {
+      if (!identical(clusterAllInds, newClusterAllInds))
       {
-        dists <- dists[which(dists <= 0.0)] # Distances for only points in cluster.
-        distOrder <- order(dists)
-        filterPosClusterLocInds <- distOrder[!duplicated(clusterGroups[distOrder])]
-        newClusterInds <- newClusterInds[filterPosClusterLocInds]
+        clusterAllInds <- newClusterAllInds
       }
+      break
     }
     newClusterPts <- p[newClusterInds,] # Coordinates of new cluster's points.
     newClusterCen <- clusterCenCalc(newClusterPts) # Coordinates of new cluster's center.
@@ -53,22 +52,19 @@ seedClusterCalc <- function(
       break
     }
     clusterShift <- distCalc(newClusterCen, clusterCen)
-    prevClusterInds <- clusterInds
+    clusterAllInds <- newClusterAllInds
     clusterInds <- newClusterInds
     clusterPts <- newClusterPts
     clusterCen <- newClusterCen
-    clusterUniGroups <- unique(obs$g[newClusterInds])
-    if (!doConflictEliminaton && length(clusterUniGroups) < length(newClusterInds))
-    {
-      clusters$cRank[i] <- conflictingRankCalc(obs$g, clusterInds, clusterPts, clusterCen, clusterUniGroups)
-      clusters$prevInds[[i]] <- prevClusterInds
-      break
-    }
     if (clusterShift < tol)
     {
       break
     }
   }
-  clusters$inds[[i]] <- clusterInds
+  clusters$inds[[i]] <- as.vector(clusterInds)
+  clusters$allInds[[i]] <- as.vector(clusterAllInds)
+  clusters$cen[[i]] <- clusterCen
+  clusters$cRank[i] <- conflictingRankCalc(obs$g, p, clusterInds, clusterAllInds, clusterCen)
+  clusters$cRankPrev[i] <- clusters$cRank[i]
   return(clusters)
 }
