@@ -1,28 +1,3 @@
-#obs <- sampleObs()
-#a <- tracker(obs)
-
-source('sampleObs.R')
-source('distMapCalc.R')
-source('clusterCenWeightMapCalc.R')
-source('distCalc.R')
-source('initSeedClustersCalc.R')
-source('seedClusterCalc.R')
-source('clusterCenCalc.R')
-source('conflictingRankCalc.R')
-source('isSeedClusterDetachableCalc.R')
-source('detachPoint.R')
-
-tracker <- function(obs)
-{
-  d <- distMapCalc(obs) # Distance map for all points. d[i,i] is filled, but distance for same group's point is NA.
-  n <- nrow(obs) # Number of points.
-  xyInds <- which(colnames(obs) == c("x","y")) # Point coordinate indices in observation data frame.
-  tol <- 1e-3 # Tolerance for mean shift process breaking.
-  w <- clusterCenWeightMapCalc(obs, d)
-
-  clusters <- clusterCalc(obs, d, w, n, xyInds, tol)
-}
-
 clusterCalc <- function(obs, d, w, n, xyInds, tol)
 {
   p <- obs[,xyInds] # Point coordinates from observation data frame.
@@ -108,6 +83,15 @@ clusterCalc <- function(obs, d, w, n, xyInds, tol)
           clusters$inds[[clusterCount]] <- seedClusterInds
           seedClusters$detached[seedClusterInds] <- TRUE
           seedClusters$cRank[seedClusterInds] <- Inf
+          
+          clusterRefInd <- seedClusterInds[which(obs$t[seedClusterInds] == max(obs$t[seedClusterInds]))]
+          clusters$id[clusterCount] <- clusterCount
+          #clusters$x[clusterCount] <- p[clusterRefInd,]$x
+          #clusters$y[clusterCount] <- p[clusterRefInd,]$y
+          clusters$x[clusterCount] <- seedClusters$cen[[clusterRefInd]]$x
+          clusters$y[clusterCount] <- seedClusters$cen[[clusterRefInd]]$y
+          clusters$t[clusterCount] <- obs$t[clusterRefInd]
+          
           d <- detachPoint(d, seedClusterInds)
           for (ind in which(!seedClusters$detached))
           {

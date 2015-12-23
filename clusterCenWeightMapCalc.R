@@ -1,7 +1,7 @@
 clusterCenWeightMapCalc <- function(
   obs,
   d, # Distance map.
-  minTimeStep = 0.05) # Typical minimal time difference.
+  minTimeStep = 0.1) # Typical minimal time difference.
 {
   timeFactor <- 1.0 / minTimeStep
   w <- d
@@ -15,5 +15,6 @@ clusterCenWeightMapCalc <- function(
         w[i,j] = 1.0 / (1.0 + timeFactor * abs(obs$t[j] - obs$t[i]))
       }
     }
-  }  
+  }
+  return(w)
 }

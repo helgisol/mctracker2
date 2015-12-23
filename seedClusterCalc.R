@@ -47,7 +47,7 @@ seedClusterCalc <- function(
       break
     }
     newClusterPts <- p[newClusterInds,] # Coordinates of new cluster's points.
-    newClusterWs <- d[i,newClusterInds]
+    newClusterWs <- w[i,newClusterInds]
     newClusterCen <- clusterCenCalc(newClusterPts, newClusterWs) # Coordinates of new cluster's center.
     if (distCalc(newClusterCen, origPt) > origMaxDist)
     {
