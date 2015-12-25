@@ -11,7 +11,7 @@ clusterCenWeightMapCalc <- function(
     {
       if (!is.na(d[i,j]))
       {
-        w[i,j] <- 1.0 / (obs$r[j] + dRdT * abs(obs$t[j] - obs$t[i]))
+        w[i,j] <- obs$r[i] / (obs$r[j] + dRdT * abs(obs$t[j] - obs$t[i]))
       }
     }
   }

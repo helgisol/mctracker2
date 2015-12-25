@@ -77,7 +77,7 @@ clusterCalc <- function(
             seedClusters$inds[[i0]] <- seedClusterInds
           }
           
-          clusterRefInd <- seedClusterInds[which(obs$t[seedClusterInds] == max(obs$t[seedClusterInds]))]
+          clusterRefInd <- seedClusterInds[which(obs$t[seedClusterInds] == max(obs$t[seedClusterInds]))][1]
           newClusterPts <- p[seedClusterInds,] # Coordinates of new cluster's points.
           newClusterWs <- w[clusterRefInd,seedClusterInds]
           newClusterCen <- clusterCenCalc(newClusterPts, newClusterWs) # Coordinates of new cluster's center.
