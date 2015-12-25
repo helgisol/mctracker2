@@ -5,12 +5,14 @@ seedClusterCalc <- function(
   d, # Distance map.
   w, # Weight map for cluster center calculation.
   i, # Index of a seed point.
-  tol) # Tolerance for mean shift process breaking.
+  tol,  # Tolerance for mean shift process breaking.
+  dRdT = 0.01) # Radius growth time factor for time difference correction.
 {
-#   if (i == 21)
-#   {
-#     a <- 1
-#   }
+  if (i == 15)
+  {
+    a <- 1
+  }
+  ri = obs$r[i]
   origPt <- p[i,]
   origMaxDist <- 2 * obs$r[i]
   clusters$detached[i] = FALSE
@@ -24,7 +26,7 @@ seedClusterCalc <- function(
     posClusterInds <- which(d[i,] <= origShift) # Indices (in global point list) of potential cluster points.
     posClusterPts <- p[posClusterInds,] # Coordinates of potential cluster points.
     dists <- distCalc(clusterCen, posClusterPts) # Distances to cluster's center from all potential cluster's points.
-    dists <- (dists - obs$r[i]) - obs$r[posClusterInds] # Distances, corrected by point radii.
+    dists <- dists - ri - (obs$r[posClusterInds] + dRdT * abs(obs$t[posClusterInds] - obs$t[i])) # Distances, corrected.
     newClusterAllInds <- posClusterInds[which(dists <= 0.0)]  # Indices (in global point list) of all cluster points.
     clusterGroups <- obs$g[newClusterAllInds]
     if (length(unique(clusterGroups)) == length(newClusterAllInds)) # If there are no conflicted points in cluster.

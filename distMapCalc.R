@@ -1,6 +1,6 @@
 distMapCalc <- function(
   obs, # Data frame wirh observations.
-  timeFactor = 0.01) # Time factor for time difference correction.
+  dRdT = 0.01) # Radius growth time factor for time difference correction.
 {
   dm <- as.matrix(dist(cbind(obs$x, obs$y)))
   n <- nrow(obs)
@@ -20,7 +20,7 @@ distMapCalc <- function(
       }
       else
       {
-        dm[i,j] = dm[i,j] - ri - (obs$r[j] + timeFactor * abs(obs$t[j] - obs$t[i]))
+        dm[i,j] = dm[i,j] - ri - (obs$r[j] + dRdT * abs(obs$t[j] - obs$t[i]))
       }
     }
   }

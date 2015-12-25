@@ -1,9 +1,8 @@
 clusterCenWeightMapCalc <- function(
-  obs,
+  obs, # Observation data frame.
   d, # Distance map.
-  minTimeStep = 0.1) # Typical minimal time difference.
+  dRdT = 0.01) # Radius growth time factor for time difference correction.
 {
-  timeFactor <- 1.0 / minTimeStep
   w <- d
   n <- nrow(d)
   for(i in 1:n)
@@ -12,7 +11,7 @@ clusterCenWeightMapCalc <- function(
     {
       if (!is.na(d[i,j]))
       {
-        w[i,j] = 1.0 / (1.0 + timeFactor * abs(obs$t[j] - obs$t[i]))
+        w[i,j] <- 1.0 / (obs$r[j] + dRdT * abs(obs$t[j] - obs$t[i]))
       }
     }
   }

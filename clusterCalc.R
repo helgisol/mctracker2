@@ -1,7 +1,14 @@
-clusterCalc <- function(obs, d, w, n, xyInds, tol)
+clusterCalc <- function(
+  obs,
+  d,
+  w,
+  n,
+  xyInds,
+  tol,
+  dRdT = 0.01) # Radius growth time factor for time difference correction.
 {
   p <- obs[,xyInds] # Point coordinates from observation data frame.
-  seedClusters <- initSeedClustersCalc(obs, p, d, w, tol)
+  seedClusters <- initSeedClustersCalc(obs, p, d, w, tol, dRdT)
   clusters <- list()
   clusterCount <- 0
   isForceClustering <- FALSE
@@ -69,6 +76,13 @@ clusterCalc <- function(obs, d, w, n, xyInds, tol)
           {
             seedClusters$inds[[i0]] <- seedClusterInds
           }
+          
+          clusterRefInd <- seedClusterInds[which(obs$t[seedClusterInds] == max(obs$t[seedClusterInds]))]
+          newClusterPts <- p[seedClusterInds,] # Coordinates of new cluster's points.
+          newClusterWs <- w[clusterRefInd,seedClusterInds]
+          newClusterCen <- clusterCenCalc(newClusterPts, newClusterWs) # Coordinates of new cluster's center.
+          seedClusters$cen[[clusterRefInd]] <- newClusterCen
+
           seedClusters$cRank[seedClusterInds] <- 0.0
           isForceClustering <- FALSE
           isUpdated <- TRUE
@@ -86,8 +100,6 @@ clusterCalc <- function(obs, d, w, n, xyInds, tol)
           
           clusterRefInd <- seedClusterInds[which(obs$t[seedClusterInds] == max(obs$t[seedClusterInds]))]
           clusters$id[clusterCount] <- clusterCount
-          #clusters$x[clusterCount] <- p[clusterRefInd,]$x
-          #clusters$y[clusterCount] <- p[clusterRefInd,]$y
           clusters$x[clusterCount] <- seedClusters$cen[[clusterRefInd]]$x
           clusters$y[clusterCount] <- seedClusters$cen[[clusterRefInd]]$y
           clusters$t[clusterCount] <- obs$t[clusterRefInd]
