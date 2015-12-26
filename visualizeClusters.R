@@ -1,5 +1,9 @@
-visualizeClusters <- function(tdata = tdata2)
+visualizeClusters <- function(tdata)
 {
+  if (nrow(tdata$pts) == 0)
+  {
+    return()
+  }
   #library(ggplot2)
   library("plotrix")
   #qplot(x, y, data = obs[[1]], color = as.factor(g))
