@@ -1,14 +1,12 @@
 clusterCalc <- function(
+  tconf,
   obs,
   d,
   w,
-  n,
-  xyInds,
-  tol,
-  dRdT = 0.01) # Radius growth time factor for time difference correction.
+  n)
 {
-  p <- obs[,xyInds] # Point coordinates from observation data frame.
-  seedClusters <- initSeedClustersCalc(obs, p, d, w, tol, dRdT)
+  p <- obs[,tconf$xyInds] # Point coordinates from observation data frame.
+  seedClusters <- initSeedClustersCalc(obs, p, d, w, tconf$tol, tconf$dRdT)
   clusters <- list()
   clusterCount <- 0
   isForceClustering <- FALSE
@@ -103,13 +101,14 @@ clusterCalc <- function(
           clusters$x[clusterCount] <- seedClusters$cen[[clusterRefInd]]$x
           clusters$y[clusterCount] <- seedClusters$cen[[clusterRefInd]]$y
           clusters$t[clusterCount] <- obs$t[clusterRefInd]
+          clusters$r[clusterCount] <- obs$r[clusterRefInd] # !!!! Must be changed !!!!
           
           d <- detachPoint(d, seedClusterInds)
           for (ind in which(!seedClusters$detached))
           {
             if (length(intersect(seedClusters$inds[[ind]], seedClusterInds)) != 0)
             {
-              seedClusters <- seedClusterCalc(seedClusters, obs, p, d, w, ind, tol)
+              seedClusters <- seedClusterCalc(seedClusters, obs, p, d, w, ind, tconf$tol)
             }
             else if (length(intersect(seedClusters$allInds[[ind]], seedClusterInds)) != 0)
             {

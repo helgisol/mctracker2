@@ -1,5 +1,7 @@
 updateClusterCnt <- function(tdata, ind)
 {
+  #newClusterCen <- calcClusterCnt(tdata$pts, tdata$xyInds, tdata$w, ind)
+  
   cmps <- tdata$cmps[[ind]]
   cmps <- cmps[!is.na(tdata$pts$x[tdata$pts$id %in% cmps])]
   if (length(cmps) == 0)
@@ -15,4 +17,6 @@ updateClusterCnt <- function(tdata, ind)
   newClusterCen <- clusterCenCalc(clusterPts, clusterWs)
   tdata$objs$x <- newClusterCen$x
   tdata$objs$y <- newClusterCen$y
+  tdata$objs$t <- max(ts)
+  tdata$objs$r <- max(tdata$pts$r[ptsInds]) # !!!! Must be changed !!!!
 }

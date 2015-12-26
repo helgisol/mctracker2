@@ -16,16 +16,26 @@ source('clusterCalc.R')
 source('visualizeClusters.R')
 source('updateClusterCnt.R')
 source('updateExistingClusters.R')
+source('calcClusterCnt.R')
+source('updateTstateForCompleteClusters.R')
+source('calcIdGroups.R')
 
 createEmptyTdata <- function()
 {
-  tdata1 <<- list()
-  tdata1[[1]] <<- list(
-    pts = data.frame(id=integer(),x=double(),y=double(),t=double(),r=double(),R=double(),g=integer()),
-    cmps =list(),
+  tconf1 <<- list(
+    xyInds = c(2,3), # Point coordinate indices in observation data frame.
+    dRdT = 4, # Radius growth time factor for time difference correction.
+    tol = 1e-3, # Tolerance for mean shift process breaking.
+    leaveClusterRFactor = 1.5, # Scale factor for cluster radius for leaving component treshold.
+    groupCount = 3)
+  tstate1 <<- list()
+  tstate1[[1]] <<- list(
+    pts = data.frame(id=integer(),x=double(),y=double(),t=double(),r=double(),g=integer()),
+    cmps = list(),
     objs = data.frame(id=integer(),x=double(),y=double(),t=double()),
-    w = matrix(double(),nrow=0,ncol=0),
-    xyInds = c(2,3)) # Point coordinate indices in observation data frame.
+    n = 0,
+    d = matrix(double(),nrow=0,ncol=0),
+    w = matrix(double(),nrow=0,ncol=0))
 }
 
 createObs <- function()
@@ -35,7 +45,7 @@ createObs <- function()
 
 processObs <- function(iter)
 {
-  tdata1[[iter+1]] <<- mct(tdata1[[iter]], obs1[[iter]])
+  tstate1[[iter+1]] <<- mct(tconf1, tstate1[[iter]], obs1[[iter]])
 }
 
 testMct <- function(iter = 1, visualize = TRUE)
@@ -48,6 +58,6 @@ testMct <- function(iter = 1, visualize = TRUE)
   processObs(iter)
   if (visualize)
   {
-    visualizeClusters(tdata1[[iter+1]], iter)
+    visualizeClusters(tstate1[[iter+1]], iter)
   }
 }

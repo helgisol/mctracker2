@@ -1,5 +1,7 @@
 distMapCalc <- function(
   obs, # Data frame wirh observations.
+  idMap,
+  idGroups,
   dRdT = 0.01) # Radius growth time factor for time difference correction.
 {
   dm <- as.matrix(dist(cbind(obs$x, obs$y)))

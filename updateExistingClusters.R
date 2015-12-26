@@ -1,49 +1,117 @@
-updateExistingClusters <- function(tdata, obs)
+updateExistingClusters <- function(tconf, oldTstate, obs)
 {
   updateExistingCluster <- function(i)
   {
-    oldCmpIds <- tdata$cmps[[i]] # Old component IDs.
+    nonconsistentCmpIds = integer()
+    
+    oldCmpIds <- oldTstate$cmps[[i]] # Old component IDs.
     newCmpIds <- obs$id[obs$id %in% oldCmpIds] # New component IDs.
     
-    oldCmpObs <- tdata$pts[tdata$pts$id %in% oldCmpIds,] # Old component observations.
+    oldCmpObs <- oldTstate$pts[oldTstate$pts$id %in% oldCmpIds,] # Old component observations.
     newCmpObs <- obs[obs$id %in% oldCmpIds,] # New component observations.
 
     visCmpIds <- oldCmpObs$id[!is.na(oldCmpObs$x)] # Visible component IDs (old non-hidden components).
     obsCmpIds <- newCmpObs$id[!is.na(newCmpObs$x)] # Observed component IDs (new non-hidden components).
-    unvisCmpIds <- setdiff(oldCmpIds, visCmpIds) # Unvisible component IDs (old hidden components).
-    unobsCmpIds <- setdiff(newCmpObs, obsCmpIds) # Unobserved component IDs (new hidden components).
+    invisCmpIds <- setdiff(oldCmpIds, visCmpIds) # Invisible component IDs (old hidden components).
+    unobsCmpIds <- setdiff(newCmpIds, obsCmpIds) # Unobserved component IDs (new hidden components).
     
     # Process deleted components.
     isNeedUpdateCnt <- FALSE
     deletedCmpIds <- setdiff(oldCmpIds, newCmpIds)
     if (length(deletedCmpIds) > 0)
     {
-      tdata$cmps[[i]] <- newCmpIds
+      oldTstate$cmps[[i]] <- newCmpIds
       isNeedUpdateCnt <- TRUE
     }
     
     # Process visible but unobserved component IDs.
-    visUnobsCmpIds <- setdiff(visCmpIds, unobsCmpIds) # Visible but unobserved component IDs.
+    visUnobsCmpIds <- intersect(visCmpIds, unobsCmpIds) # Visible but unobserved component IDs.
     if (length(visUnobsCmpIds) > 0)
     {
-      tdata$pts$x[tdata$pts$id %in% visUnobsCmpIds,] <- NA
+      oldTstate$pts$x[oldTstate$pts$id %in% visUnobsCmpIds] <- NA
       isNeedUpdateCnt <- TRUE
     }
     
     # Process visible and observed component IDs.
-    if (isNeedUpdateCnt)
+    visObsCmpIds <- intersect(visCmpIds, obsCmpIds) # Visible and observed component IDs.
+    if (length(visObsCmpIds) > 0)
     {
-      updateClusterCnt(tdata, i)
+      if (length(visObsCmpIds) > 1)
+      {
+        if (isNeedUpdateCnt)
+        {
+          updateClusterCnt(oldTstate, i)
+          isNeedUpdateCnt <- FALSE
+        }
+        repeat
+        {
+          #newClusterCen <- calcClusterCnt(obs, tconf$xyInds, oldTstate$w, cmpIds)
+          oldClusterCenPt <- oldTstate$objs[i,tconf$xyInds]
+          oldClusterCenT <- oldTstate$objs$t[i]
+          oldClusterCenR <- oldTstate$objs$r[i] * tconf$leaveClusterRFactor
+          
+          newVisObsCmpObs <- newCmpObs[newCmpObs$id %in% visObsCmpIds,] # Visible and observed component observations.
+          newClusterPts <- newVisObsCmpObs[,tconf$xyInds]
+          newClusterTs <- newVisObsCmpObs$t
+          dists <- distCalc(oldClusterCenPt, newClusterPts)
+          dists <- dists - oldClusterCenR - (newVisObsCmpObs$r + tconf$dRdT * abs(newClusterTs - oldClusterCenT))
+          distOrder <- order(dists, decreasing = TRUE)
+          if (dists[distOrder[1]] <= 0.0)
+          {
+            break
+          }
+          nonconsistentCmpId <- visObsCmpIds[distOrder[1]]
+          visCmpIds <- setdiff(visCmpIds, nonconsistentCmpId)
+          obsCmpIds <- setdiff(obsCmpIds, nonconsistentCmpId)
+          visObsCmpIds <- setdiff(visObsCmpIds, nonconsistentCmpId)
+          oldCmpIds <- setdiff(oldCmpIds, nonconsistentCmpId)
+          oldTstate$cmps[[i]] <- oldCmpIds
+          nonconsistentCmpIds <- c(nonconsistentCmpIds, nonconsistentCmpId)
+          updateClusterCnt(oldTstate, i)
+          if (length(visObsCmpIds) == 1)
+          {
+            break
+          }
+        }
+      }
+      oldTstate$pts[oldTstate$pts$id %in% visObsCmpIds,] <- newCmpObs[newCmpObs$id %in% visObsCmpIds,]
+      updateClusterCnt(oldTstate, i)
+      isNeedUpdateCnt <- FALSE
     }
     
-    
-    
+    # Process invisible but observed component IDs.
+    invisObsCmpIds <- intersect(invisCmpIds, obsCmpIds) # Invisible but observed component IDs.
+    if (length(invisObsCmpIds) > 0)
+    {
+      oldTstate$pts[oldTstate$pts$id %in% invisObsCmpIds,] <- newCmpObs[newCmpObs$id %in% invisObsCmpIds,]
+      if (length(visObsCmpIds) == 0)
+      {
+        revisObsCmpId <- min(invisObsCmpIds)
+        visObsCmpIds <- revisObsCmpId
+        invisObsCmpIds <- setdiff(invisObsCmpIds, revisObsCmpId)
+        updateClusterCnt(oldTstate, i)
+        isNeedUpdateCnt <- FALSE
+      }
+      if (length(invisObsCmpIds) > 0)
+      {
+        stopifnot(!isNeedUpdateCnt)
+        repeat
+        {
+          break
+          #Mean-shift
+        }
+      }
+    }
+    return(nonconsistentCmpIds)
   }
-  if (length(tdata$cmps) > 0)
+  nonconsistentCmpAllIds <- integer()
+  if (length(oldTstate$cmps) > 0)
   {
-    for (i in 1:length(tdata$cmps))
+    for (i in 1:length(oldTstate$cmps))
     {
-      updateExistingCluster(i)
+      nonconsistentCmpIds <- updateExistingCluster(i)
+      nonconsistentCmpAllIds <- c(nonconsistentCmpAllIds, nonconsistentCmpIds)
     }
   }
+  return(nonconsistentCmpAllIds)
 }

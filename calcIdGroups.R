@@ -1,0 +1,4 @@
+calcIdGroups <- function(idMap)
+{
+  
+}
