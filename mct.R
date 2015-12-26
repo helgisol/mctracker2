@@ -1,13 +1,11 @@
 mct <- function(tdata, obs)
 {
-  xyInds <- which(colnames(obs) %in% c("x","y")) # Point coordinate indices in observation data frame.
-  
   obsNewIds <- setdiff(obs$id, tdata$pts$id) # Vector of ID's for new points.
   obsDelIds <- setdiff(tdata$pts$id, obs$id) # Vector of ID's for deleted points.
   obsExiIds <- setdiff(obs$id, obsNewIds) # Vector of ID's for existed points.
   #obsHidIds <- obsExiIds[is.na(obsExiIds$x)] # Vector of ID's for hidden points.
   
-  updateExistingClusters(tdata, obs, xyInds)
+  updateExistingClusters(tdata, obs)
 
   tol <- 1e-3 # Tolerance for mean shift process breaking.
   dRdT <- 4 # Radius growth time factor for time difference correction.
@@ -15,7 +13,7 @@ mct <- function(tdata, obs)
   w <- clusterCenWeightMapCalc(obs, d, dRdT) # Calculate weight map for cluster center calculation.
   n <- nrow(obs) # Number of points.
 
-  clusters <- clusterCalc(obs, d, w, n, xyInds, tol, dRdT)
+  clusters <- clusterCalc(obs, d, w, n, tdata$xyInds, tol, dRdT)
   components <- lapply(clusters$inds, function(x) obs$id[x])
   objects <- data.frame(
     id = clusters$id,
@@ -23,6 +21,6 @@ mct <- function(tdata, obs)
     y = clusters$y,
     t = clusters$t);
 
-  newTdata <- list(pts = obs, cmps = components, objs = objects, w = w)
+  newTdata <- list(pts = obs, cmps = components, objs = objects, w = w, xyInds = tdata$xyInds)
   return(newTdata)
 }

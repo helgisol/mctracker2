@@ -1,4 +1,4 @@
-updateExistingClusters <- function(tdata, obs, xyInds)
+updateExistingClusters <- function(tdata, obs)
 {
   if (length(tdata$cmps) > 0)
   {
@@ -11,7 +11,7 @@ updateExistingClusters <- function(tdata, obs, xyInds)
       if (nrow(newHiddenPts) > 0)
       {
         tdata$pts[tdata$pts$id %in% newHiddenPts$id,] <- newHiddenPts
-        updateClusterCnt(tdata, xyInds, i)
+        updateClusterCnt(tdata, i)
       }
     }
   }

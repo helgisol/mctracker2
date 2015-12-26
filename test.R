@@ -1,3 +1,6 @@
+#testMct(1)
+#testMct(2)
+
 source('mct.R')
 source('sampleObs.R')
 source('distMapCalc.R')
@@ -16,22 +19,23 @@ source('updateExistingClusters.R')
 
 createEmptyTdata <- function()
 {
-  tdata <<- list()
-  tdata[[1]] <<- list(
+  tdata1 <<- list()
+  tdata1[[1]] <<- list(
     pts = data.frame(id=integer(),x=double(),y=double(),t=double(),r=double(),R=double(),g=integer()),
-    cmps=list(),
+    cmps =list(),
     objs = data.frame(id=integer(),x=double(),y=double(),t=double()),
-    w=matrix(double(),nrow=0,ncol=0))
+    w = matrix(double(),nrow=0,ncol=0),
+    xyInds = c(2,3)) # Point coordinate indices in observation data frame.
 }
 
 createObs <- function()
 {
-  obs <<- sampleObs()
+  obs1 <<- sampleObs()
 }
 
 processObs <- function(iter)
 {
-  tdata[[iter+1]] <<- mct(tdata, obs[[iter]])
+  tdata1[[iter+1]] <<- mct(tdata1[[iter]], obs1[[iter]])
 }
 
 testMct <- function(iter = 1, visualize = TRUE)
@@ -44,6 +48,6 @@ testMct <- function(iter = 1, visualize = TRUE)
   processObs(iter)
   if (visualize)
   {
-    visualizeClusters(tdata[[iter+1]])
+    visualizeClusters(tdata1[[iter+1]])
   }
 }
