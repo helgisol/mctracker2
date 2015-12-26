@@ -1,4 +1,4 @@
-visualizeClusters <- function(tdata)
+visualizeClusters <- function(tdata, iter)
 {
   if (nrow(tdata$pts) == 0)
   {
@@ -7,7 +7,7 @@ visualizeClusters <- function(tdata)
   #library(ggplot2)
   library("plotrix")
   #qplot(x, y, data = obs[[1]], color = as.factor(g))
-  plot(tdata$pts$x, tdata$pts$y, col=tdata$pts$g, pch=20, asp=1, xlab="x", ylab="y")
+  plot(tdata$pts$x, tdata$pts$y, col=tdata$pts$g, pch=20, asp=1, xlab="x", ylab="y", main=paste("Iter #", iter))
   text(tdata$pts$x, tdata$pts$y, as.character(tdata$pts$id), pos=4, col=tdata$pts$g)
   points(tdata$objs$x, tdata$objs$y, pch=23, col=max(tdata$pts$g)+1)
   text(tdata$objs$x, tdata$objs$y, as.character(tdata$objs$id), pos=2, col=max(tdata$pts$g)+1)

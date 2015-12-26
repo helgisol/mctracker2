@@ -48,6 +48,6 @@ testMct <- function(iter = 1, visualize = TRUE)
   processObs(iter)
   if (visualize)
   {
-    visualizeClusters(tdata1[[iter+1]])
+    visualizeClusters(tdata1[[iter+1]], iter)
   }
 }
