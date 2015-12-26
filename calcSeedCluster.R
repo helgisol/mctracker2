@@ -1,4 +1,4 @@
-seedClusterCalc <- function(
+calcSeedCluster <- function(
   clusters, # List for all seed clusters.
   obs, # Observation data frame.
   p, # Point coordinates from observation data frame.

@@ -3,27 +3,29 @@
 
 source('mct.R')
 source('sampleObs.R')
-source('distMapCalc.R')
-source('clusterCenWeightMapCalc.R')
+source('calcDistMap.R')
+source('calcClusterCenWeightMap.R')
 source('distCalc.R')
-source('initSeedClustersCalc.R')
-source('seedClusterCalc.R')
+source('calcSeedClusters.R')
+source('calcSeedCluster.R')
 source('clusterCenCalc.R')
 source('conflictingRankCalc.R')
 source('isSeedClusterDetachableCalc.R')
 source('detachPoint.R')
-source('clusterCalc.R')
+source('calcClusters.R')
 source('visualizeClusters.R')
 source('updateClusterCnt.R')
 source('updateExistingClusters.R')
 source('calcClusterCnt.R')
 source('updateTstateForCompleteClusters.R')
 source('calcIdGroups.R')
+source('createSeeds.R')
 
 createEmptyTdata <- function()
 {
   tconf1 <<- list(
     xyInds = c(2,3), # Point coordinate indices in observation data frame.
+    ixytrInds = c(1, 2,3,4,5),
     dRdT = 4, # Radius growth time factor for time difference correction.
     tol = 1e-3, # Tolerance for mean shift process breaking.
     leaveClusterRFactor = 1.5, # Scale factor for cluster radius for leaving component treshold.
@@ -32,7 +34,7 @@ createEmptyTdata <- function()
   tstate1[[1]] <<- list(
     pts = data.frame(id=integer(),x=double(),y=double(),t=double(),r=double(),g=integer()),
     cmps = list(),
-    objs = data.frame(id=integer(),x=double(),y=double(),t=double()),
+    objs = data.frame(id=integer(),x=double(),y=double(),t=double(),r=double()),
     n = 0,
     d = matrix(double(),nrow=0,ncol=0),
     w = matrix(double(),nrow=0,ncol=0))

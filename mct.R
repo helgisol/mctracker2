@@ -11,32 +11,13 @@ mct <- function(tconf, oldTstate, obs)
   newTstate$pts <- obs
   newTstate$n <- nrow(obs) # Number of points.
   
+  seeds <- createSeeds(tconf, oldTstate, newTstate)
   newTstate <- updateTstateForCompleteClusters(tconf, oldTstate, newTstate)
-  
-  nonconsistentCmpIds <- updateExistingClusters(tconf, oldTstate, obs)
-  incompleteClusterIds <- 
-    if (length(oldTstate$cmps) > 0)
-    {
-      oldTstate$objs$id[sapply(oldTstate$cmps, function(x) length(x) > 0 && length(x) < tconf$groupCount)]
-    }
-    else
-    {
-      integer()
-    }
-  newObsIds <- setdiff(obs$id, oldTstate$pts$id) # Vector of ID's for pure new (previously non-existed) points.
-  
-  idMap <- cbind(
-    type = c(rep(1, length(incompleteClusterIds)), rep(2, length(nonconsistentCmpIds)), rep(3, length(newObsIds))),
-    id = c(incompleteClusterIds, nonconsistentCmpIds, newObsIds))
-  idGroups <- c(
-    lapply(oldTstate$cmps[incompleteClusterIds], function(x) oldTstate$pts$g[x]),
-    as.list(oldTstate$pts$g[oldTstate$pts$id %in% nonconsistentCmpIds]),
-    as.list(newTstate$pts$g[newTstate$pts$id %in% newObsIds]))
 
-  newTstate$d <- distMapCalc(obs, idMap, tconf$dRdT) # Distance map for all points. d[i,i] is filled, but distance for same group's point is NA.
-  newTstate$w <- clusterCenWeightMapCalc(obs, newTstate$d, tconf$dRdT) # Calculate weight map for cluster center calculation.
+  newTstate$d <- calcDistMap(tconf, seeds) # Distance map for all points. d[i,i] is filled, but distance for same group's point is NA.
+  newTstate$w <- calcClusterCenWeightMap(tconf, seeds, newTstate$d) # Calculate weight map for cluster center calculation.
 
-  clusters <- clusterCalc(tconf, obs, newTstate$d, newTstate$w, newTstate$n)
+  clusters <- calcClusters(tconf, seeds, newTstate$d, newTstate$w, newTstate$n)
   components <- lapply(clusters$inds, function(x) obs$id[x])
   objects <- data.frame(
     id = clusters$id,

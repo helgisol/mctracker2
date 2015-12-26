@@ -1,12 +1,13 @@
-clusterCalc <- function(
+calcClusters <- function(
   tconf,
-  obs,
+  seeds,
   d,
   w,
   n)
 {
+  obs <- seeds$objs
   p <- obs[,tconf$xyInds] # Point coordinates from observation data frame.
-  seedClusters <- initSeedClustersCalc(obs, p, d, w, tconf$tol, tconf$dRdT)
+  seedClusters <- calcSeedClusters(tconf, obs, p, d, w)
   clusters <- list()
   clusterCount <- 0
   isForceClustering <- FALSE
