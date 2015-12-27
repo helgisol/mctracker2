@@ -20,6 +20,8 @@ source('updateTstateForCompleteClusters.R')
 source('calcIdGroups.R')
 source('calcSeedCluster.R')
 source('createSeeds.R')
+source('coordinateClusters.R')
+source('calcClusterCenWeights.R')
 
 createEmptyTdata <- function()
 {
@@ -29,15 +31,16 @@ createEmptyTdata <- function()
     dRdT = 4, # Radius growth time factor for time difference correction.
     tol = 1e-3, # Tolerance for mean shift process breaking.
     leaveClusterRFactor = 1.5, # Scale factor for cluster radius for leaving component treshold.
-    groupCount = 3)
+    groupCount = 3,
+    typeIncompleteCluster = 1,
+    typeNonconsistentCmp = 2,
+    typeNewObs = 3)
   tstate1 <<- list()
   tstate1[[1]] <<- list(
     pts = data.frame(id=integer(),x=double(),y=double(),t=double(),r=double(),g=integer()),
     cmps = list(),
     objs = data.frame(id=integer(),x=double(),y=double(),t=double(),r=double()),
-    n = 0,
-    d = matrix(double(),nrow=0,ncol=0),
-    w = matrix(double(),nrow=0,ncol=0))
+    lastId = 0)
 }
 
 createObs <- function()

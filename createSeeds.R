@@ -1,6 +1,5 @@
-createSeeds <- function(tconf, oldTstate, newTstate)
+createSeeds <- function(tconf, oldTstate, newTstate, nonconsistentCmpIds)
 {
-  nonconsistentCmpIds <- updateExistingClusters(tconf, oldTstate, newTstate$pts)
   incompleteClusterIds <- 
     if (length(oldTstate$cmps) > 0)
     {
@@ -14,12 +13,12 @@ createSeeds <- function(tconf, oldTstate, newTstate)
   
   seeds <- list(
     g = c(
-      lapply(oldTstate$cmps[incompleteClusterIds], function(x) oldTstate$pts$g[x]),
+      lapply(oldTstate$cmps[oldTstate$objs$id %in% incompleteClusterIds], function(x) oldTstate$pts$g[x]),
       as.list(oldTstate$pts$g[oldTstate$pts$id %in% nonconsistentCmpIds]),
       as.list(newTstate$pts$g[newTstate$pts$id %in% newObsIds])),
     objs = rbind(
       cbind(
-        oldTstate$objs[newTstate$pts$id %in% incompleteClusterIds, tconf$ixytrInds],
+        oldTstate$objs[oldTstate$objs$id %in% incompleteClusterIds, tconf$ixytrInds],
         type = rep(1, length(incompleteClusterIds))),
       cbind(
         newTstate$pts[newTstate$pts$id %in% nonconsistentCmpIds, tconf$ixytrInds],

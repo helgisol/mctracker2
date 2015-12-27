@@ -1,22 +1,24 @@
-updateClusterCnt <- function(tdata, ind)
+updateClusterCnt <- function(tconf, tstate, ind)
 {
-  #newClusterCen <- calcClusterCnt2(tdata$pts, tdata$xyInds, tdata$w, ind)
+  #newClusterCen <- calcClusterCnt2(tstate$pts, tstate$xyInds, tstate$w, ind)
   
-  cmps <- tdata$cmps[[ind]]
-  cmps <- cmps[!is.na(tdata$pts$x[tdata$pts$id %in% cmps])]
+  cmps <- tstate$cmps[[ind]]
+  cmps <- cmps[!is.na(tstate$pts$x[tstate$pts$id %in% cmps])]
   if (length(cmps) == 0)
   {
-    tdata$objs$x[ind] <- NA
+    tstate$objs$x[ind] <- NA
     return
   }
-  ptsInds <- which(tdata$pts$id %in% cmps)
-  ts <- tdata$pts$t[ptsInds]
+  ptsInds <- which(tstate$pts$id %in% cmps)
+  ts <- tstate$pts$t[ptsInds]
   refPtInd <- ptsInds[which(ts == max(ts))][1]
-  clusterPts <- tdata$pts[ptsInds, tdata$xyInds]
-  clusterWs <- tdata$w[refPtInd, ptsInds]
+  clusterPts <- tstate$pts[ptsInds, tconf$xyInds]
+  #clusterWs <- tstate$w[refPtInd, ptsInds]
+  clusterWs <- calcClusterCenWeights(tconf, tstate$pts, refPtInd, ptsInds)
   newClusterCen <- calcClusterCnt(clusterPts, clusterWs)
-  tdata$objs$x <- newClusterCen$x
-  tdata$objs$y <- newClusterCen$y
-  tdata$objs$t <- max(ts)
-  tdata$objs$r <- max(tdata$pts$r[ptsInds]) # !!!! Must be changed !!!!
+  tstate$objs$x[ind] <- newClusterCen$x
+  tstate$objs$y[ind] <- newClusterCen$y
+  tstate$objs$t[ind] <- max(ts)
+  tstate$objs$r[ind] <- max(tstate$pts$r[ptsInds]) # !!!! Must be changed !!!!
+  return(tstate)
 }

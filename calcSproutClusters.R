@@ -95,7 +95,7 @@ calcSproutClusters <- function(
           seedClusters$cRank[seedClusterInds] <- Inf
           
           clusterTs <- seeds$objs$t[seedClusterInds]
-          clusterRefInd <- seedClusterInds[which(clusterTs == max(clusterTs))]
+          clusterRefInd <- seedClusterInds[which(clusterTs == max(clusterTs))][1]
           clusters$id[clusterCount] <- clusterCount
           clusters$x[clusterCount] <- seedClusters$cen[[clusterRefInd]]$x
           clusters$y[clusterCount] <- seedClusters$cen[[clusterRefInd]]$y

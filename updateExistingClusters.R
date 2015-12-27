@@ -1,7 +1,11 @@
 updateExistingClusters <- function(tconf, oldTstate, obs)
 {
-  updateExistingCluster <- function(i)
+  updateExistingCluster <- function(oldTstate, i)
   {
+    if (i == 8)
+    {
+      q1 <- 1
+    }
     nonconsistentCmpIds = integer()
     
     oldCmpIds <- oldTstate$cmps[[i]] # Old component IDs.
@@ -40,7 +44,7 @@ updateExistingClusters <- function(tconf, oldTstate, obs)
       {
         if (isNeedUpdateCnt)
         {
-          updateClusterCnt(oldTstate, i)
+          oldTstate <- updateClusterCnt(tconf, oldTstate, i)
           isNeedUpdateCnt <- FALSE
         }
         repeat
@@ -67,7 +71,7 @@ updateExistingClusters <- function(tconf, oldTstate, obs)
           oldCmpIds <- setdiff(oldCmpIds, nonconsistentCmpId)
           oldTstate$cmps[[i]] <- oldCmpIds
           nonconsistentCmpIds <- c(nonconsistentCmpIds, nonconsistentCmpId)
-          updateClusterCnt(oldTstate, i)
+          oldTstate <- updateClusterCnt(tconf, oldTstate, i)
           if (length(visObsCmpIds) == 1)
           {
             break
@@ -75,7 +79,7 @@ updateExistingClusters <- function(tconf, oldTstate, obs)
         }
       }
       oldTstate$pts[oldTstate$pts$id %in% visObsCmpIds,] <- newCmpObs[newCmpObs$id %in% visObsCmpIds,]
-      updateClusterCnt(oldTstate, i)
+      oldTstate <- updateClusterCnt(tconf, oldTstate, i)
       isNeedUpdateCnt <- FALSE
     }
     
@@ -89,7 +93,7 @@ updateExistingClusters <- function(tconf, oldTstate, obs)
         revisObsCmpId <- min(invisObsCmpIds)
         visObsCmpIds <- revisObsCmpId
         invisObsCmpIds <- setdiff(invisObsCmpIds, revisObsCmpId)
-        updateClusterCnt(oldTstate, i)
+        oldTstate <- updateClusterCnt(tconf, oldTstate, i)
         isNeedUpdateCnt <- FALSE
       }
       if (length(invisObsCmpIds) > 0)
@@ -102,16 +106,16 @@ updateExistingClusters <- function(tconf, oldTstate, obs)
         }
       }
     }
-    return(nonconsistentCmpIds)
+    oldTstate$nonconsistentCmpAllIds <- c(oldTstate$nonconsistentCmpAllIds, nonconsistentCmpIds)
+    return(oldTstate)
   }
-  nonconsistentCmpAllIds <- integer()
+  oldTstate$nonconsistentCmpAllIds <- integer() 
   if (length(oldTstate$cmps) > 0)
   {
     for (i in 1:length(oldTstate$cmps))
     {
-      nonconsistentCmpIds <- updateExistingCluster(i)
-      nonconsistentCmpAllIds <- c(nonconsistentCmpAllIds, nonconsistentCmpIds)
+      oldTstate <- updateExistingCluster(oldTstate, i)
     }
   }
-  return(nonconsistentCmpAllIds)
+  return(oldTstate)
 }

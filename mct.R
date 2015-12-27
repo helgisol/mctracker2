@@ -1,33 +1,29 @@
 mct <- function(tconf, oldTstate, obs)
 {
-  #obsNewIds <- setdiff(obs$id, oldTstate$pts$id) # Vector of ID's for new points.
-  #obsDelIds <- setdiff(oldTstate$pts$id, obs$id) # Vector of ID's for deleted points.
-  #obsExiIds <- setdiff(obs$id, obsNewIds) # Vector of ID's for existed points.
-  #obsHidIds <- obsExiIds[is.na(obsExiIds$x)] # Vector of ID's for hidden points.
-
   newTstate <- list(
     cmps = list(),
     objs = data.frame(id=integer(),x=double(),y=double(),t=double()))
   newTstate$pts <- obs
+  newTstate$lastId <- oldTstate$lastId
   
-  seeds <- createSeeds(tconf, oldTstate, newTstate)
+  oldTstate <- updateExistingClusters(tconf, oldTstate, newTstate$pts)
+  nonconsistentCmpIds <- oldTstate$nonconsistentCmpAllIds
+  newTstate <- updateTstateForCompleteClusters(tconf, oldTstate, newTstate)
+
+  seeds <- createSeeds(tconf, oldTstate, newTstate, nonconsistentCmpIds)
   seeds$d <- calcDistMap(tconf, seeds) # Distance map for all seeds.
   seeds$w <- calcClusterCenWeightMap(tconf, seeds) # Calculate weight map for cluster center calculation.
 
-  newTstate <- updateTstateForCompleteClusters(tconf, oldTstate, newTstate)
-
   sproutClusters <- calcSproutClusters(tconf, seeds)
-  clusters <- sproutClusters
-  components <- lapply(clusters$inds, function(x) obs$id[x])
-  objects <- data.frame(
-    id = clusters$id,
-    x = clusters$x,
-    y = clusters$y,
-    t = clusters$t,
-    r = clusters$r);
+  coordClusters <- coordinateClusters(tconf, oldTstate, seeds, sproutClusters, newTstate$lastId)
 
-  newTstate$cmps <- c(newTstate$cmps, components)
-  newTstate$objs <- rbind(newTstate$objs, objects)
+  newTstate$lastId <- max(coordClusters$objs$id)
+  newTstate$cmps <- c(newTstate$cmps, coordClusters$cmps)
+  newTstate$objs <- rbind(newTstate$objs, coordClusters$objs)
+  if (nrow(newTstate$objs) > 0)
+  {
+    row.names(newTstate$objs) <- 1:nrow(newTstate$objs)
+  }
 
   return(newTstate)
 }
