@@ -1,20 +1,18 @@
 calcSeedCluster <- function(
+  tconf,
+  seeds,
   clusters, # List for all seed clusters.
-  obs, # Observation data frame.
-  p, # Point coordinates from observation data frame.
-  d, # Distance map.
-  w, # Weight map for cluster center calculation.
-  i, # Index of a seed point.
-  tol,  # Tolerance for mean shift process breaking.
-  dRdT = 0.01) # Radius growth time factor for time difference correction.
+  i) # Index of a seed object.
 {
   if (i == 15)
   {
     a <- 1
   }
-  ri = obs$r[i]
+  p <- seeds$objs[,tconf$xyInds] # Point coordinates from observation data frame.
+  ri = seeds$objs$r[i]
+  ti = seeds$objs$t[i]
   origPt <- p[i,]
-  origMaxDist <- 2 * obs$r[i]
+  origMaxDist <- 2 * ri
   clusters$detached[i] = FALSE
   clusterAllInds <- c(i)
   clusterInds <- c(i)
@@ -22,14 +20,16 @@ calcSeedCluster <- function(
   clusterCen <- origPt
   repeat
   {
-    origShift <- distCalc(origPt, clusterCen) # Distance between original point and cluster's center.
-    posClusterInds <- which(d[i,] <= origShift) # Indices (in global point list) of potential cluster points.
+    origShift <- calcPointDist(origPt, clusterCen) # Distance between original point and cluster's center.
+    posClusterInds <- which(seeds$d[i,] <= origShift) # Indices (in global point list) of potential cluster points.
     posClusterPts <- p[posClusterInds,] # Coordinates of potential cluster points.
-    dists <- distCalc(clusterCen, posClusterPts) # Distances to cluster's center from all potential cluster's points.
-    dists <- dists - ri - (obs$r[posClusterInds] + dRdT * abs(obs$t[posClusterInds] - obs$t[i])) # Distances, corrected.
+    # Distances to cluster's center from all potential cluster's points.
+    dists <- calcPointDist(clusterCen, posClusterPts)
+    # Distances, corrected.
+    dists <- dists - ri - (seeds$objs$r[posClusterInds] + tconf$dRdT * abs(seeds$objs$t[posClusterInds] - ti))
     newClusterAllInds <- posClusterInds[which(dists <= 0.0)]  # Indices (in global point list) of all cluster points.
-    clusterGroups <- obs$g[newClusterAllInds]
-    if (length(unique(clusterGroups)) == length(newClusterAllInds)) # If there are no conflicted points in cluster.
+    clusterGroups <- unlist(seeds$g[newClusterAllInds])
+    if (length(unique(clusterGroups)) == length(clusterGroups)) # If there are no conflicted points in cluster.
     {
       newClusterInds <- newClusterAllInds  # Indices (in global point list) of only closes from conflicting points.
     }
@@ -37,8 +37,19 @@ calcSeedCluster <- function(
     {
       dists <- dists[which(dists <= 0.0)] # Distances for only points in cluster.
       distOrder <- order(dists)
-      filterPosClusterLocInds <- distOrder[!duplicated(clusterGroups[distOrder])]
-      newClusterInds <- sort(newClusterAllInds[filterPosClusterLocInds])
+      newClusterInds <- integer()
+      newClusterGroups <- integer()
+      for (j in distOrder)
+      {
+        jInd <- newClusterAllInds[j]
+        jGroup <- seeds$g[[jInd]]
+        if (length(intersect(newClusterGroups, jGroup)) == 0)
+        {
+          newClusterInds <- c(newClusterInds, jInd)
+          newClusterGroups <- c(newClusterGroups, jGroup)
+        }
+      }
+      newClusterInds <- sort(newClusterInds)
     }
     if (identical(clusterInds, newClusterInds))
     {
@@ -49,18 +60,18 @@ calcSeedCluster <- function(
       break
     }
     newClusterPts <- p[newClusterInds,] # Coordinates of new cluster's points.
-    newClusterWs <- w[i,newClusterInds]
-    newClusterCen <- clusterCenCalc(newClusterPts, newClusterWs) # Coordinates of new cluster's center.
-    if (distCalc(newClusterCen, origPt) > origMaxDist)
+    newClusterWs <- seeds$w[i,newClusterInds]
+    newClusterCen <- calcClusterCnt(newClusterPts, newClusterWs) # Coordinates of new cluster's center.
+    if (calcPointDist(newClusterCen, origPt) > origMaxDist)
     {
       break
     }
-    clusterShift <- distCalc(newClusterCen, clusterCen)
+    clusterShift <- calcPointDist(newClusterCen, clusterCen)
     clusterAllInds <- newClusterAllInds
     clusterInds <- newClusterInds
     clusterPts <- newClusterPts
     clusterCen <- newClusterCen
-    if (clusterShift < tol)
+    if (clusterShift < tconf$tol)
     {
       break
     }
@@ -68,7 +79,7 @@ calcSeedCluster <- function(
   clusters$inds[[i]] <- as.vector(clusterInds)
   clusters$allInds[[i]] <- as.vector(clusterAllInds)
   clusters$cen[[i]] <- clusterCen
-  clusters$cRank[i] <- conflictingRankCalc(obs$g, p, clusterInds, clusterAllInds, clusterCen)
+  clusters$cRank[i] <- calcConflictingRank(tconf, seeds, clusterInds, clusterAllInds, clusterCen)
   clusters$cRankPrev[i] <- clusters$cRank[i]
   return(clusters)
 }

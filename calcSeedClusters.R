@@ -1,15 +1,11 @@
 calcSeedClusters <- function(
   tconf,
-  obs, # Observation data frame.
-  p, # Point coordinates from observation data frame.
-  d, # Distance map.
-  w) # Radius growth time factor for time difference correction.
+  seeds)
 {
   clusters <- list()
-  n <- nrow(obs) # Observed point count.
-  for(i in 1:n)
+  for(i in 1:nrow(seeds$objs))
   {
-    clusters <- calcSeedCluster(clusters, obs, p, d, w, i, tconf$tol, tconf$dRdT)
+    clusters <- calcSeedCluster(tconf, seeds, clusters, i)
   }
   return(clusters)
 }

@@ -1,8 +1,8 @@
 calcClusterCenWeightMap <- function(
   tconf,
-  seeds,
-  d) # Distance map.
+  seeds)
 {
+  d <- seeds$d # Distance map.
   w <- d
   n <- nrow(d)
   for(i in 1:n)

@@ -9,15 +9,15 @@ mct <- function(tconf, oldTstate, obs)
     cmps = list(),
     objs = data.frame(id=integer(),x=double(),y=double(),t=double()))
   newTstate$pts <- obs
-  newTstate$n <- nrow(obs) # Number of points.
   
   seeds <- createSeeds(tconf, oldTstate, newTstate)
+  seeds$d <- calcDistMap(tconf, seeds) # Distance map for all seeds.
+  seeds$w <- calcClusterCenWeightMap(tconf, seeds) # Calculate weight map for cluster center calculation.
+
   newTstate <- updateTstateForCompleteClusters(tconf, oldTstate, newTstate)
 
-  newTstate$d <- calcDistMap(tconf, seeds) # Distance map for all points. d[i,i] is filled, but distance for same group's point is NA.
-  newTstate$w <- calcClusterCenWeightMap(tconf, seeds, newTstate$d) # Calculate weight map for cluster center calculation.
-
-  clusters <- calcClusters(tconf, seeds, newTstate$d, newTstate$w, newTstate$n)
+  sproutClusters <- calcSproutClusters(tconf, seeds)
+  clusters <- sproutClusters
   components <- lapply(clusters$inds, function(x) obs$id[x])
   objects <- data.frame(
     id = clusters$id,
@@ -26,8 +26,8 @@ mct <- function(tconf, oldTstate, obs)
     t = clusters$t,
     r = clusters$r);
 
-  newTstate$cmps <- components
-  newTstate$objs <- objects
-  
+  newTstate$cmps <- c(newTstate$cmps, components)
+  newTstate$objs <- rbind(newTstate$objs, objects)
+
   return(newTstate)
 }

@@ -1,4 +1,4 @@
-calcDistMap <- function(
+calcDistMap <- function( # Distance map for all seeds. d[i,i] is filled, but distance for same group's point is NA.
   tconf,
   seeds)
 {

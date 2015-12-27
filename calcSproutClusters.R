@@ -1,18 +1,14 @@
-calcClusters <- function(
+calcSproutClusters <- function(
   tconf,
-  seeds,
-  d,
-  w,
-  n)
+  seeds)
 {
-  obs <- seeds$objs
-  p <- obs[,tconf$xyInds] # Point coordinates from observation data frame.
-  seedClusters <- calcSeedClusters(tconf, obs, p, d, w)
   clusters <- list()
+  seedClusters <- calcSeedClusters(tconf, seeds)
   clusterCount <- 0
   isForceClustering <- FALSE
   isUpdated <- TRUE
-  for(j in 1:2000)
+  n <- nrow(seeds$objs)
+  for (j in 1:2000)
   {
     if (j == 1000)
     {
@@ -21,7 +17,7 @@ calcClusters <- function(
     if (isForceClustering)
     {
       isForceClustering <- FALSE
-      for(i in 1:n)
+      for (i in 1:n)
       {
         if (seedClusters$cRank[i] != Inf)
         {
@@ -40,7 +36,7 @@ calcClusters <- function(
     }
     isUpdated <- FALSE
     cRankOrder <- order(seedClusters$cRank)
-    for(i in 1:n)
+    for (i in 1:n)
     {
       k <- cRankOrder[i]
       if (seedClusters$cRank[k] == Inf)
@@ -76,10 +72,11 @@ calcClusters <- function(
             seedClusters$inds[[i0]] <- seedClusterInds
           }
           
-          clusterRefInd <- seedClusterInds[which(obs$t[seedClusterInds] == max(obs$t[seedClusterInds]))][1]
-          newClusterPts <- p[seedClusterInds,] # Coordinates of new cluster's points.
-          newClusterWs <- w[clusterRefInd,seedClusterInds]
-          newClusterCen <- clusterCenCalc(newClusterPts, newClusterWs) # Coordinates of new cluster's center.
+          clusterTs <- seeds$objs$t[seedClusterInds]
+          clusterRefInd <- seedClusterInds[which(clusterTs == max(clusterTs))][1]
+          newClusterPts <- seeds$objs[seedClusterInds, tconf$xyInds] # Coordinates of new cluster's points.
+          newClusterWs <- seeds$w[clusterRefInd, seedClusterInds]
+          newClusterCen <- calcClusterCnt(newClusterPts, newClusterWs) # Coordinates of new cluster's center.
           seedClusters$cen[[clusterRefInd]] <- newClusterCen
 
           seedClusters$cRank[seedClusterInds] <- 0.0
@@ -90,31 +87,32 @@ calcClusters <- function(
       }
       if (seedClusters$cRank[k] == 0.0)
       {
-        if (isSeedClusterDetachableCalc(seedClusters, seedClusterInds))
+        if (calcIsSeedClusterDetachable(seedClusters, seedClusterInds))
         {
           clusterCount <- clusterCount + 1
           clusters$inds[[clusterCount]] <- seedClusterInds
           seedClusters$detached[seedClusterInds] <- TRUE
           seedClusters$cRank[seedClusterInds] <- Inf
           
-          clusterRefInd <- seedClusterInds[which(obs$t[seedClusterInds] == max(obs$t[seedClusterInds]))]
+          clusterTs <- seeds$objs$t[seedClusterInds]
+          clusterRefInd <- seedClusterInds[which(clusterTs == max(clusterTs))]
           clusters$id[clusterCount] <- clusterCount
           clusters$x[clusterCount] <- seedClusters$cen[[clusterRefInd]]$x
           clusters$y[clusterCount] <- seedClusters$cen[[clusterRefInd]]$y
-          clusters$t[clusterCount] <- obs$t[clusterRefInd]
-          clusters$r[clusterCount] <- obs$r[clusterRefInd] # !!!! Must be changed !!!!
+          clusters$t[clusterCount] <- seeds$objs$t[clusterRefInd]
+          clusters$r[clusterCount] <- seeds$objs$r[clusterRefInd] # !!!! Must be changed !!!!
           
-          d <- detachPoint(d, seedClusterInds)
+          seeds$d <- detachPoint(seeds$d, seedClusterInds)
           for (ind in which(!seedClusters$detached))
           {
             if (length(intersect(seedClusters$inds[[ind]], seedClusterInds)) != 0)
             {
-              seedClusters <- seedClusterCalc(seedClusters, obs, p, d, w, ind, tconf$tol)
+              seedClusters <- calcSeedCluster(tconf, seeds, seedClusters, ind)
             }
             else if (length(intersect(seedClusters$allInds[[ind]], seedClusterInds)) != 0)
             {
               seedClusters$allInds[[ind]] <- setdiff(seedClusters$allInds[[ind]], seedClusterInds)
-              seedClusters$cRank[ind] <- conflictingRankCalc(obs$g, p, seedClusters$inds[[ind]], seedClusters$allInds[[ind]], seedClusters$cen[[ind]])
+              seedClusters$cRank[ind] <- calcConflictingRank(tconf, seeds, seedClusters$inds[[ind]], seedClusters$allInds[[ind]], seedClusters$cen[[ind]])
               seedClusters$cRankPrev[ind] <- seedClusters$cRank[ind]
             }
             else if (seedClusters$cRank[ind] == 0.0 && seedClusters$cRankPrev[ind] != 0.0)

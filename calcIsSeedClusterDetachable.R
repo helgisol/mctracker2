@@ -1,4 +1,4 @@
-isSeedClusterDetachableCalc <- function(seedClusters, inds)
+calcIsSeedClusterDetachable <- function(seedClusters, inds)
 {
   n <- length(inds)
   if (n == 1)

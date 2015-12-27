@@ -45,7 +45,7 @@ updateExistingClusters <- function(tconf, oldTstate, obs)
         }
         repeat
         {
-          #newClusterCen <- calcClusterCnt(obs, tconf$xyInds, oldTstate$w, cmpIds)
+          #newClusterCen <- calcClusterCnt2(obs, tconf$xyInds, oldTstate$w, cmpIds)
           oldClusterCenPt <- oldTstate$objs[i,tconf$xyInds]
           oldClusterCenT <- oldTstate$objs$t[i]
           oldClusterCenR <- oldTstate$objs$r[i] * tconf$leaveClusterRFactor
@@ -53,7 +53,7 @@ updateExistingClusters <- function(tconf, oldTstate, obs)
           newVisObsCmpObs <- newCmpObs[newCmpObs$id %in% visObsCmpIds,] # Visible and observed component observations.
           newClusterPts <- newVisObsCmpObs[,tconf$xyInds]
           newClusterTs <- newVisObsCmpObs$t
-          dists <- distCalc(oldClusterCenPt, newClusterPts)
+          dists <- calcPointDist(oldClusterCenPt, newClusterPts)
           dists <- dists - oldClusterCenR - (newVisObsCmpObs$r + tconf$dRdT * abs(newClusterTs - oldClusterCenT))
           distOrder <- order(dists, decreasing = TRUE)
           if (dists[distOrder[1]] <= 0.0)
