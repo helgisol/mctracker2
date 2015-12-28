@@ -2,7 +2,7 @@ updateExistingClusters <- function(tconf, oldTstate, obs)
 {
   updateExistingCluster <- function(oldTstate, i)
   {
-    if (i == 8)
+    if (i == 2)
     {
       q1 <- 1
     }
@@ -101,10 +101,37 @@ updateExistingClusters <- function(tconf, oldTstate, obs)
         stopifnot(!isNeedUpdateCnt)
         repeat
         {
-          break
-          #Mean-shift
+          oldClusterCenPt <- oldTstate$objs[i,tconf$xyInds]
+          oldClusterCenT <- oldTstate$objs$t[i]
+          oldClusterCenR <- oldTstate$objs$r[i] * tconf$leaveClusterRFactor
+          
+          invisObsCmpObs <- newCmpObs[newCmpObs$id %in% invisObsCmpIds,] # Invisible but observed component observations.
+          newClusterPts <- invisObsCmpObs[,tconf$xyInds]
+          newClusterTs <- invisObsCmpObs$t
+          dists <- calcPointDist(oldClusterCenPt, newClusterPts)
+          dists <- dists - oldClusterCenR - (invisObsCmpObs$r + tconf$dRdT * abs(newClusterTs - oldClusterCenT))
+          distOrder <- order(dists, decreasing = TRUE)
+          if (dists[distOrder[1]] <= 0.0)
+          {
+            break
+          }
+          nonconsistentCmpId <- invisObsCmpIds[distOrder[1]]
+          invisCmpIds <- setdiff(invisCmpIds, nonconsistentCmpId)
+          obsCmpIds <- setdiff(obsCmpIds, nonconsistentCmpId)
+          invisObsCmpIds <- setdiff(invisObsCmpIds, nonconsistentCmpId)
+          oldCmpIds <- setdiff(oldCmpIds, nonconsistentCmpId)
+          oldTstate$cmps[[i]] <- oldCmpIds
+          nonconsistentCmpIds <- c(nonconsistentCmpIds, nonconsistentCmpId)
+          oldTstate <- updateClusterCnt(tconf, oldTstate, i)
+          if (length(invisObsCmpIds) == 0)
+          {
+            break
+          }
         }
       }
+      #oldTstate$pts[oldTstate$pts$id %in% invisObsCmpIds,] <- newCmpObs[newCmpObs$id %in% invisObsCmpIds,]
+      oldTstate <- updateClusterCnt(tconf, oldTstate, i)
+      isNeedUpdateCnt <- FALSE
     }
     oldTstate$nonconsistentCmpAllIds <- c(oldTstate$nonconsistentCmpAllIds, nonconsistentCmpIds)
     return(oldTstate)

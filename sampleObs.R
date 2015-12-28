@@ -14,8 +14,8 @@ sampleObs <- function() # Sample of observation data for mc-tracker.
   obs2$y <- obs2$y - 0.04
   obs2$t <- obs2$t + 0.1
   obs2$r <- obs2$r + 0.01
-  obs2$x[1] <- NA
-  obs2$x[16] <- NA
+  obs2$x[obs2$id==1] <- NA
+  obs2$x[obs2$id==16] <- NA
   obs2 <- rbind(obs2, list(id=22, x=6.2, y=0.0, t=0.1, r=0.55, g=1))
   
   obs3 <- obs2
@@ -27,6 +27,13 @@ sampleObs <- function() # Sample of observation data for mc-tracker.
   obs3 <- rbind(obs3, list(id=24, x=6.8, y=-0.2, t=0.3, r=0.55, g=3))
   obs3 <- obs3[obs3$id != 1,]
 
-  obs <- list(obs1, obs2, obs3)
+  obs4 <- obs3
+  obs4$x[obs4$id==16] <- 1.7
+  obs4$x <- obs4$x + 0.05
+  obs4$y <- obs4$y - 0.06
+  obs4$t <- obs4$t - 0.2
+  obs4$r <- obs4$r - 0.01
+
+  obs <- list(obs1, obs2, obs3, obs4)
   return(obs)
 }
