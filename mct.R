@@ -5,12 +5,13 @@ mct <- function(tconf, oldTstate, obs)
     objs = data.frame(id=integer(),x=double(),y=double(),t=double()))
   newTstate$pts <- obs
   newTstate$lastId <- oldTstate$lastId
+  prevTstate <- oldTstate
   
   oldTstate <- updateExistingClusters(tconf, oldTstate, newTstate$pts)
   nonconsistentCmpIds <- oldTstate$nonconsistentCmpAllIds
   newTstate <- updateTstateForCompleteClusters(tconf, oldTstate, newTstate)
 
-  seeds <- createSeeds(tconf, oldTstate, newTstate, nonconsistentCmpIds)
+  seeds <- createSeeds(tconf, oldTstate, newTstate, nonconsistentCmpIds, prevTstate)
   seeds$d <- calcDistMap(tconf, seeds) # Distance map for all seeds.
   seeds$w <- calcClusterCenWeightMap(tconf, seeds) # Calculate weight map for cluster center calculation.
 

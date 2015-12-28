@@ -8,25 +8,32 @@ calcSeedCluster <- function(
   {
     a <- 1
   }
-  p <- seeds$objs[,tconf$xyInds] # Point coordinates from observation data frame.
+  #p <- seeds$objs[,tconf$xyInds] # Point coordinates from observation data frame.
   ri = seeds$objs$r[i]
   ti = seeds$objs$t[i]
-  origPt <- p[i,]
+  origPt <- seeds$objs[i,tconf$xyInds]
   origMaxDist <- 2 * ri
   clusters$detached[i] = FALSE
   clusterAllInds <- c(i)
   clusterInds <- c(i)
-  clusterPts <- p[clusterInds,]
+  clusterPts <- seeds$objs[clusterInds,tconf$xyInds]
   clusterCen <- origPt
   repeat
   {
     origShift <- calcPointDist(origPt, clusterCen) # Distance between original point and cluster's center.
     posClusterInds <- which(seeds$d[i,] <= origShift) # Indices (in global point list) of potential cluster points.
-    posClusterPts <- p[posClusterInds,] # Coordinates of potential cluster points.
+    posClusterPts <- seeds$objs[posClusterInds,tconf$xyInds] # Coordinates of potential cluster points.
     # Distances to cluster's center from all potential cluster's points.
     dists <- calcPointDist(clusterCen, posClusterPts)
     # Distances, corrected.
     dists <- dists - ri - (seeds$objs$r[posClusterInds] + tconf$dRdT * abs(seeds$objs$t[posClusterInds] - ti))
+    if (TRUE) # Using history of objects.
+    {
+      posClusterPts1 <- seeds$objs1[posClusterInds,tconf$xyInds]
+      dists1 <- calcPointDist(clusterCen, posClusterPts1)
+      dists1 <- dists1 - ri - (seeds$objs1$r[posClusterInds] + tconf$dRdT * abs(seeds$objs1$t[posClusterInds] - ti))
+      dists <- colMeans(rbind(dists, dists1), na.rm = TRUE)
+    }
     newClusterAllInds <- posClusterInds[which(dists <= 0.0)]  # Indices (in global point list) of all cluster points.
     clusterGroups <- unlist(seeds$g[newClusterAllInds])
     if (length(unique(clusterGroups)) == length(clusterGroups)) # If there are no conflicted points in cluster.
@@ -59,7 +66,7 @@ calcSeedCluster <- function(
       }
       break
     }
-    newClusterPts <- p[newClusterInds,] # Coordinates of new cluster's points.
+    newClusterPts <- seeds$objs[newClusterInds,tconf$xyInds] # Coordinates of new cluster's points.
     newClusterWs <- seeds$w[i,newClusterInds]
     newClusterCen <- calcClusterCnt(newClusterPts, newClusterWs) # Coordinates of new cluster's center.
     if (calcPointDist(newClusterCen, origPt) > origMaxDist)
