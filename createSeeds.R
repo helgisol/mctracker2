@@ -1,48 +1,61 @@
-createSeeds <- function(tconf, oldTstate, newTstate, nonconsistentCmpIds, prevTstate)
+createSeeds <- function(tconf, tstate)
 {
   incompleteClusterIds <- 
-    if (length(oldTstate$cmps) > 0)
+    if (length(tstate$cmdIdsUpd) > 0)
     {
-      oldTstate$objs$id[sapply(oldTstate$cmps, function(x) length(x) > 0 && length(x) < tconf$groupCount)]
+      tstate$objsUpd$id[sapply(tstate$cmdIdsUpd, function(x) length(x) > 0 && length(x) < tconf$groupCount)]
     }
   else
   {
     integer()
   }
-  newObsIds <- setdiff(newTstate$pts$id, oldTstate$pts$id) # Vector of ID's for pure new (previously non-existed) points.
+  incompleteClusterObjs <- tstate$objsUpd[tstate$objsUpd$id %in% incompleteClusterIds, tconf$ixytrInds]
+  newObsIds <- setdiff(tstate$obs$id, tstate$obss[[1]]$id) # Vector of ID's for pure new (previously non-existed) points.
+  nonconsistentCmpObs <- tstate$obs[!(tstate$obs$id %in% newObsIds) && is.na(tstate$obs$tc), tconf$ixytrInds]
+  newObs <- tstate$obs[tstate$obs$id %in% newObsIds,]
   
   objs <- rbind(
     cbind(
-      oldTstate$objs[oldTstate$objs$id %in% incompleteClusterIds, tconf$ixytrInds],
-      type = rep(1, length(incompleteClusterIds))),
+      incompleteClusterObjs,
+      type = rep(1, nrow(incompleteClusterObjs))),
     cbind(
-      newTstate$pts[newTstate$pts$id %in% nonconsistentCmpIds, tconf$ixytrInds],
-      type = rep(2, length(nonconsistentCmpIds))),
+      nonconsistentCmpObs,
+      type = rep(2, nrow(nonconsistentCmpObs))),
     cbind(
-      newTstate$pts[newTstate$pts$id %in% newObsIds, tconf$ixytrInds],
-      type = rep(3, length(newObsIds))))
-  
-  objs1 <- rbind(
-    cbind(
-      prevTstate$objs[prevTstate$objs$id %in% incompleteClusterIds, tconf$ixytrInds],
-      type = rep(1, length(incompleteClusterIds))),
-    cbind(
-      prevTstate$pts[prevTstate$pts$id %in% nonconsistentCmpIds, tconf$ixytrInds],
-      type = rep(2, length(nonconsistentCmpIds))),
-    data.frame(
-      id=newObsIds,
-      x=rep(NA,length(newObsIds)),
-      y=rep(NA,length(newObsIds)),
-      t=rep(NA,length(newObsIds)),
-      r=rep(NA,length(newObsIds)),
-      type=rep(3,length(newObsIds))))
+      newObs[,tconf$ixytrInds],
+      type = rep(3, nrow(newObs))))
+
   
   seeds <- list(
     g = c(
-      lapply(oldTstate$cmps[oldTstate$objs$id %in% incompleteClusterIds], function(x) oldTstate$pts$g[x]),
-      as.list(oldTstate$pts$g[oldTstate$pts$id %in% nonconsistentCmpIds]),
-      as.list(newTstate$pts$g[newTstate$pts$id %in% newObsIds])),
-    objs = objs,
-    objs1 = objs1)
+      lapply(tstate$cmdIdsUpd[tstate$objsUpd$id %in% incompleteClusterIds], function(x) oldTstate$pts$g[x]),
+      as.list(nonconsistentCmpObs$g),
+      as.list(newObs$g)),
+    objs = objs)
+  
+  seeds$d <- calcDistMap(tconf, seeds) # Distance map for all seeds.
+  seeds$w <- calcClusterCenWeightMap(tconf, seeds) # Calculate weight map for cluster center calculation.
+  
+  # Update history for changed cluster objects.
+  if (length(incompleteClusterIds) > 0)
+  {
+      for (id in incompleteClusterIds)
+      {
+        newCmpIds <- tstate$cmdIdsUpd[tstate$objsUpd$id == id]
+        oldCmpIds <- tstate$cmdIds[tstate$objsid == id]
+        if (!identical(newCmpIds, oldCmpIds))
+        {
+          newCmpObs <- tstate$obs[tstate$obs$id %in% newCmpIds,]
+          visNewCmpIds <- newCmpObs$id[!is.na(newCmpObs$x)]
+          for (lelel in 1:length(tstate$objss))
+          {
+            updatedObj <- tstate$objss[[level]][tstate$objss[[level]]$id == id, tconf$ixytrInds]
+            tstate$objss[[level]][tstate$objss[[level]]$id == id, tconf$ixytrInds] <-
+              updateClusterObj(tconf, updatedObj, visNewCmpIds, tstate$obss[[level]])
+          }
+        }
+      }
+  }
+  
   return(seeds)
 }

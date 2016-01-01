@@ -27,7 +27,7 @@ calcSeedCluster <- function(
     dists <- calcPointDist(clusterCen, posClusterPts)
     # Distances, corrected.
     dists <- dists - ri - (seeds$objs$r[posClusterInds] + tconf$dRdT * abs(seeds$objs$t[posClusterInds] - ti))
-    if (TRUE) # Using history of objects.
+    if (FALSE) # Using history of objects.
     {
       posClusterPts1 <- seeds$objs1[posClusterInds,tconf$xyInds]
       dists1 <- calcPointDist(clusterCen, posClusterPts1)

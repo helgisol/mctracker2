@@ -1,4 +1,4 @@
-coordinateClusters <- function(tconf, oldTstate, seeds, sproutClusters, lastId)
+coordinateClusters <- function(tconf, tstate, seeds, sproutClusters, lastId)
 {
   if (length(sproutClusters$id) == 0)
   {
@@ -11,7 +11,7 @@ coordinateClusters <- function(tconf, oldTstate, seeds, sproutClusters, lastId)
     y = sproutClusters$y,
     t = sproutClusters$t,
     r = sproutClusters$r)
-  coordClusters$cmps <- lapply(sproutClusters$inds, function(x) seeds$objs$id[x])
+  coordClusters$cmpIds <- lapply(sproutClusters$inds, function(x) seeds$objs$id[x])
   for (i in 1:length(sproutClusters$id))
   {
     cmpInds <- sproutClusters$inds[[i]]
@@ -32,8 +32,8 @@ coordinateClusters <- function(tconf, oldTstate, seeds, sproutClusters, lastId)
     {
       if (seeds$objs$type[cmpInd] == tconf$typeIncompleteCluster)
       {
-        oldTstateInd <- which(oldTstate$objs$id == seeds$objs$id[cmpInd])
-        realCmpIds <- oldTstate$cmps[[oldTstateInd]]
+        oldTstateInd <- which(tstate$objs$id == seeds$objs$id[cmpInd])
+        realCmpIds <- tstate$cmpIds[[oldTstateInd]]
         cmpIds <- c(cmpIds, realCmpIds)
       }
       else
@@ -41,7 +41,7 @@ coordinateClusters <- function(tconf, oldTstate, seeds, sproutClusters, lastId)
         cmpIds <- c(cmpIds, seeds$objs$id[cmpInd])
       }
     }
-    coordClusters$cmps[[i]] <- cmpIds
+    coordClusters$cmpIds[[i]] <- cmpIds
   }
   return(coordClusters)
 }
