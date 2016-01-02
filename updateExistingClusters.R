@@ -10,9 +10,9 @@ updateExistingClusters <- function(tconf, tstate)
         q1 <- 1
       }
       updClusters[[i]] <- calcUpdCluster(tconf, tstate, tstate$cmpIds[[i]], tstate$objs[i,])
-      tstate$obs$tc[tstate$obs$id %in% updClusters[[i]]$ncCmpIds] <- NA
+      tstate$obs$tc[tstate$obs$id %in% updClusters[[i]]$ncCmpIds] <- NA # Mark observations for nonconsistent components.
     }
-    updClusters <- updClusters[lapply(updClusters, function(x) {length(x$cmpIds)}) > 0]
+    updClusters <- updClusters[lapply(updClusters, function(x) {length(x$cmpIds)}) > 0] # Filter deleted clusters.
     tstate$cmpIdsUpd <- lapply(updClusters, function(x) {x$cmpIds})
     tstate$objsUpd <- do.call(rbind.data.frame, lapply(updClusters, function(x) {x$obj}) )
   }
@@ -20,7 +20,6 @@ updateExistingClusters <- function(tconf, tstate)
   {
     tstate$cmpIdsUpd <- tstate$cmpIds
     tstate$objsUpd <- tstate$objs
-    
   }
   return(tstate)
 }

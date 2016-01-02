@@ -57,42 +57,43 @@ calcUpdCluster <- function(
   {
     if (length(visObsCmpIds) > 1)
     {
-      if (isNeedUpdateCnt)
+      repeat
       {
-        updCluster$obj <- updateClusterObj(tconf, updCluster$obj, visObsCmpIds, oldCmpObs)
-        isNeedUpdateCnt <- FALSE
-      }
-      oldClusterCenPt <- updCluster$obj[,tconf$xyInds]
-      oldClusterCenT <- updCluster$obj$t
-      oldClusterCenR <- updCluster$obj$r
-      newVisObsCmpObs <- newCmpObs[newCmpObs$id %in% visObsCmpIds,] # Visible and observed component observations.
-      newClusterPts <- newVisObsCmpObs[,tconf$xyInds]
-      newClusterTs <- newVisObsCmpObs$t
-      newClusterRs <- newVisObsCmpObs$r
-      newClusterTcs <- newVisObsCmpObs$tc
-      minTc <- min(newCmpObs$tc)
-      newClusterTcW <- calcClusterTcWeights(tconf, newClusterTcs, minTc)
-      dists <- calcPointDist(oldClusterCenPt, newClusterPts)
-      dists <- dists - oldClusterCenR - (newClusterRs + 
-                                           tconf$dRdT * abs(newClusterTs - oldClusterCenT) *
-                                           tconf$clusterRFactorLost * newClusterTcW)
-      if (max(dists) > 0.0)
-      {
-        goodVisObsCmpInds <- which(dists <= 0.0)
-        if (length(goodVisObsCmpInds) == 0)
+        if (isNeedUpdateCnt)
         {
-          goodVisObsCmpInds <- order(dists)[1]
+          updCluster$obj <- updateClusterObj(tconf, updCluster$obj, visObsCmpIds, oldCmpObs)
+          isNeedUpdateCnt <- FALSE
         }
-        goodVisObsCmpIds <- visObsCmpIds[goodVisObsCmpInds]
-        
-        badVisObsCmpIds <- setdiff(visObsCmpIds, goodVisObsCmpIds)
-        
-        visCmpIds <- setdiff(visCmpIds, badVisObsCmpIds)
-        obsCmpIds <- setdiff(obsCmpIds, badVisObsCmpIds)
-        visObsCmpIds <- setdiff(visObsCmpIds, badVisObsCmpIds)
-        
-        updCluster$cmpIds <- setdiff(updCluster$cmpIds, badVisObsCmpIds)
-        updCluster$ncCmpIds <- c(updCluster$ncCmpIds, badVisObsCmpIds)
+        oldClusterCenPt <- updCluster$obj[,tconf$xyInds]
+        oldClusterCenT <- updCluster$obj$t
+        oldClusterCenR <- updCluster$obj$r
+        newVisObsCmpObs <- newCmpObs[newCmpObs$id %in% visObsCmpIds,] # Visible and observed component observations.
+        newClusterPts <- newVisObsCmpObs[,tconf$xyInds]
+        newClusterTs <- newVisObsCmpObs$t
+        newClusterRs <- newVisObsCmpObs$r
+        newClusterTcs <- newVisObsCmpObs$tc
+        minTc <- min(newCmpObs$tc)
+        newClusterTcW <- calcClusterTcWeights(tconf, newClusterTcs, minTc)
+        dists <- calcPointDist(oldClusterCenPt, newClusterPts)
+        dists <- dists - oldClusterCenR - (newClusterRs + 
+                                             tconf$dRdT * abs(newClusterTs - oldClusterCenT) *
+                                             tconf$clusterRFactorLost * newClusterTcW)
+        distOrder <- order(dists, decreasing = TRUE)
+        if (dists[distOrder[1]] <= 0.0)
+        {
+          break
+        }
+        badVisObsCmpId <- visObsCmpIds[distOrder[1]]
+        visCmpIds <- setdiff(visCmpIds, badVisObsCmpId)
+        obsCmpIds <- setdiff(obsCmpIds, badVisObsCmpId)
+        visObsCmpIds <- setdiff(visObsCmpIds, badVisObsCmpId)
+        updCluster$cmpIds <- setdiff(updCluster$cmpIds, badVisObsCmpId)
+        updCluster$ncCmpIds <- c(updCluster$ncCmpIds, badVisObsCmpId)
+        if (length(visObsCmpIds) == 1)
+        {
+          break
+        }
+        isNeedUpdateCnt <- TRUE
       }
     }
     stopifnot(length(visObsCmpIds) > 0)
