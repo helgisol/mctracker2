@@ -10,7 +10,9 @@ updateObjss <- function(tconf, tstate, updClusters)
   incompleteClusterIds <- 
     if (length(updClusters$cmpIds) > 0)
     {
-      updClusters$objs$id[sapply(updClusters$cmpIds, function(x) length(x) > 0 && length(x) < tconf$groupCount)]
+      setdiff(
+        updClusters$objs$id[sapply(updClusters$cmpIds, function(x) length(x) > 0 && length(x) < tconf$groupCount)],
+        updClusters$unobsObjIds)
     }
   else
   {
