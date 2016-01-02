@@ -15,9 +15,9 @@ updateClusterObj <- function(tconf, obj, visCmpIds, obs)
   clusterPts <- visCmpObs[, tconf$xyInds]
   clusterWs <- calcClusterCenWeights(tconf, visCmpObs, refPtInd, 1:length(visCmpIds))
   newClusterCen <- calcClusterCnt(clusterPts, clusterWs)
-  obj$x[ind] <- newClusterCen$x
-  obj$y[ind] <- newClusterCen$y
-  obj$t[ind] <- tMax
-  obj$r[ind] <- max(visCmpObs$r[refPtInd], weighted.mean(visCmpObs$r, clusterWs))
+  obj$x <- newClusterCen$x
+  obj$y <- newClusterCen$y
+  obj$t <- tMax
+  obj$r <- max(visCmpObs$r[refPtInd], weighted.mean(visCmpObs$r, clusterWs))
   return(obj)
 }

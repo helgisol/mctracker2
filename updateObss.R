@@ -4,14 +4,16 @@ updateObss <- function(tconf, tstate, obs)
   if (!is.null(tstate$obs))
   {
     prevObs <- tstate$obs
-    tstate$obss <- ifelse(
-      length(tstate$obss) == 0,
-      list(tstate$obs[,tconf$ixytrgInds]),
-      list(tstate$obs[,tconf$ixytrgInds], tstate$obss[1:min(length(tstate$obss),tconf$obsHistDepth)]))
-    tstate$objss <- ifelse(
-      length(tstate$objss) == 0,
-      list(tstate$objs),
-      list(tstate$objs, tstate$objss[1:min(length(tstate$objss),tconf$obsHistDepth)]))
+    tstate$obss <-
+      if (length(tstate$obss) == 0)
+        list(tstate$obs[,tconf$ixytrgInds])
+      else
+        c(list(tstate$obs[,tconf$ixytrgInds]), tstate$obss[1:min(length(tstate$obss),tconf$obsHistDepth)])
+    tstate$objss <-
+      if (length(tstate$objss) == 0)
+        list(tstate$objs)
+      else
+        c(list(tstate$objs), tstate$objss[1:min(length(tstate$objss),tconf$obsHistDepth)])
   }
   tstate$obs <- obs
   tstate$obs$tf <- tstate$obs$t # Time of the first detection.
@@ -19,7 +21,7 @@ updateObss <- function(tconf, tstate, obs)
   if (!is.null(prevObs))
   {
     ids <- intersect(prevObs$id, obs$id)
-    tstate$obs[tstate$obs$id %in% ids, tftcInds] <- prevObs[prevObs$id %in% ids, tftcInds]
+    tstate$obs[tstate$obs$id %in% ids, tconf$tftcInds] <- prevObs[prevObs$id %in% ids, tconf$tftcInds]
   }
   return(tstate)
 }

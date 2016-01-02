@@ -1,9 +1,9 @@
 updateExistingClusters <- function(tconf, tstate)
 {
-  updClusters <- list()
-  if (length(tstate$cmps) > 0)
+  if (length(tstate$cmpIds) > 0)
   {
-    for (i in 1:length(tstate$cmps))
+    updClusters <- list()
+    for (i in 1:length(tstate$cmpIds))
     {
       if (i == 2)
       {

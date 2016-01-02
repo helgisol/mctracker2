@@ -4,7 +4,7 @@ calcClusterTcWeights <- function(tconf, tcs, minTc)
   tcDiffsMax <- max(tcDiffs)
   if (tcDiffsMax < tconf$tolClusterTcDiffsMax)
   {
-    newClusterTcW <- rep(tconf$clusterRFactorFirst, 1:length(tcs))
+    newClusterTcW <- rep(tconf$clusterRFactorFirst, length(tcs))
   }
   else
   {

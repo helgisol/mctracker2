@@ -26,6 +26,7 @@ source('updateObss.R')
 source('updateClusterObj.R')
 source('calcClusterTcWeights.R')
 source('calcUpdCluster.R')
+source('updateCoordClusters.R')
 
 createEmptyTdata <- function()
 {

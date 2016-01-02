@@ -1,5 +1,6 @@
-coordinateClusters <- function(tconf, tstate, seeds, sproutClusters, lastId)
+coordinateClusters <- function(tconf, tstate, seeds, sproutClusters)
 {
+  lastId <- tstate$lastId
   if (length(sproutClusters$id) == 0)
   {
     return(sproutClusters)
