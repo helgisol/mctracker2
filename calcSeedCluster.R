@@ -1,19 +1,16 @@
 calcSeedCluster <- function(
   tconf,
   seeds,
-  clusters, # List for all seed clusters.
   i) # Index of a seed object.
 {
   if (i == 15)
   {
     a <- 1
   }
-  #p <- seeds$objs[,tconf$xyInds] # Point coordinates from observation data frame.
   ri = seeds$objs$r[i]
   ti = seeds$objs$t[i]
   origPt <- seeds$objs[i,tconf$xyInds]
   origMaxDist <- 2 * ri
-  clusters$detached[i] = FALSE
   clusterAllInds <- c(i)
   clusterInds <- c(i)
   clusterPts <- seeds$objs[clusterInds,tconf$xyInds]
@@ -83,10 +80,10 @@ calcSeedCluster <- function(
       break
     }
   }
-  clusters$inds[[i]] <- as.vector(clusterInds)
-  clusters$allInds[[i]] <- as.vector(clusterAllInds)
-  clusters$cen[[i]] <- clusterCen
-  clusters$cRank[i] <- calcConflictingRank(tconf, seeds, clusterInds, clusterAllInds, clusterCen)
-  clusters$cRankPrev[i] <- clusters$cRank[i]
-  return(clusters)
+  cluster = list(
+    inds = as.vector(clusterInds),
+    allInds = as.vector(clusterAllInds),
+    cen = clusterCen,
+    cRank = calcConflictingRank(tconf, seeds, clusterInds, clusterAllInds, clusterCen))
+  return(cluster)
 }

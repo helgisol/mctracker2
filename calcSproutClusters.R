@@ -107,12 +107,20 @@ calcSproutClusters <- function(
           {
             if (length(intersect(seedClusters$inds[[ind]], seedClusterInds)) != 0)
             {
-              seedClusters <- calcSeedCluster(tconf, seeds, seedClusters, ind)
+              #seedClusters <- calcSeedCluster(tconf, seeds, seedClusters, ind)
+              seedCluster <- calcSeedCluster(tconf, seeds, ind)
+              seedClusters$detached[ind] = FALSE
+              seedClusters$inds[[ind]] <- seedCluster$inds
+              seedClusters$allInds[[ind]] <- seedCluster$allInds
+              seedClusters$cen[[ind]] <- seedCluster$cen
+              seedClusters$cRank[ind] <- seedCluster$cRank
+              seedClusters$cRankPrev[ind] <- seedCluster$cRank
             }
             else if (length(intersect(seedClusters$allInds[[ind]], seedClusterInds)) != 0)
             {
               seedClusters$allInds[[ind]] <- setdiff(seedClusters$allInds[[ind]], seedClusterInds)
-              seedClusters$cRank[ind] <- calcConflictingRank(tconf, seeds, seedClusters$inds[[ind]], seedClusters$allInds[[ind]], seedClusters$cen[[ind]])
+              seedClusters$cRank[ind] <- calcConflictingRank(tconf, seeds, seedClusters$inds[[ind]],
+                                                             seedClusters$allInds[[ind]], seedClusters$cen[[ind]])
               seedClusters$cRankPrev[ind] <- seedClusters$cRank[ind]
             }
             else if (seedClusters$cRank[ind] == 0.0 && seedClusters$cRankPrev[ind] != 0.0)
