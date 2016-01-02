@@ -4,11 +4,12 @@
 mct <- function(tconf, tstate, obs)
 {
   tstate <- updateObss(tconf, tstate, obs)
-  tstate <- updateExistingClusters(tconf, tstate)
-  seeds <- createSeeds(tconf, tstate)
+  updClusters <- calcUpdClusters(tconf, tstate)
+  tstate <- updateObjss(tconf, tstate, updClusters)
+  seeds <- createSeeds(tconf, tstate, updClusters)
   sproutClusters <- calcSproutClusters(tconf, seeds)
   coordClusters <- coordinateClusters(tconf, tstate, seeds, sproutClusters)
-  tstate <- updateCompleteClusters(tconf, tstate)
+  tstate <- updateCompleteClusters(tconf, tstate, updClusters)
   tstate <- updateCoordClusters(tconf, tstate, coordClusters)
   return(tstate)
 }

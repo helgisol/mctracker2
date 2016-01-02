@@ -1,10 +1,10 @@
 # 1. Update observations' list for current stage.
-# 2. Update history of observations (obss) and history of cluster objects (objss).
+# 2. Update history of observations (obss).
 # 3. Update tf (time of the first detection) & tc (time of the first inclsion in cluster) for all observations.
 updateObss <- function(tconf, tstate, obs)
 {
   prevObs <- NULL
-  if (!is.null(tstate$obs)) # Update tstate$obss & tstate$objss.
+  if (!is.null(tstate$obs)) # Update tstate$obss.
   {
     prevObs <- tstate$obs # Remomber the previous observations for future processing.
     tstate$obss <-
@@ -12,11 +12,6 @@ updateObss <- function(tconf, tstate, obs)
         list(tstate$obs[,tconf$ixytrgInds])
       else
         c(list(tstate$obs[,tconf$ixytrgInds]), tstate$obss[1:min(length(tstate$obss),tconf$obsHistDepth)])
-    tstate$objss <-
-      if (length(tstate$objss) == 0)
-        list(tstate$objs)
-      else
-        c(list(tstate$objs), tstate$objss[1:min(length(tstate$objss),tconf$obsHistDepth)])
   }
   tstate$obs <- obs # Update tstate$obs by new observations.
   tstate$obs$tf <- tstate$obs$t # Set tf (time of the first detection) by default values.

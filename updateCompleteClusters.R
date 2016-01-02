@@ -1,11 +1,11 @@
-updateCompleteClusters <- function(tconf, tstate)
+updateCompleteClusters <- function(tconf, tstate, updClusters)
 {
   stopifnot(tconf$groupCount > 0)
-  if (length(tstate$cmpIdsUpd) > 0)
+  if (length(updClusters$cmpIds) > 0)
   {
-    completeClusterInds <- which(sapply(tstate$cmpIdsUpd, function(x) length(x) == tconf$groupCount))
-    tstate$cmpIds <- tstate$cmpIdsUpd[completeClusterInds]
-    tstate$objs <- tstate$objsUpd[completeClusterInds,]
+    completeClusterInds <- which(sapply(updClusters$cmpIds, function(x) length(x) == tconf$groupCount))
+    tstate$cmpIds <- updClusters$cmpIds[completeClusterInds]
+    tstate$objs <- updClusters$objs[completeClusterInds,]
   }
   else
   {
