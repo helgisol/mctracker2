@@ -33,6 +33,7 @@ createEmptyTdata <- function()
     ixytrInds = 1:5,
     ixytrgInds = 1:6,
     tftcInds = c(7,8),
+    cenInds = 1:2, # Seed cluster center coordinate indices.
     dRdT = 4, # Radius growth time factor for time difference correction.
     tol = 1e-3, # Tolerance for calculation of time difference between components' first times in a cluster.
     tolClusterTcDiffsMax = 1e-5, # Tolerance for mean shift process breaking.

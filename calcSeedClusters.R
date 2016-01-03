@@ -2,16 +2,19 @@ calcSeedClusters <- function(
   tconf,
   seeds)
 {
-  clusters <- list()
+  seedClusterList <- list()
   for(i in 1:nrow(seeds$objs))
   {
-    cluster <- calcSeedCluster(tconf, seeds, i)
-    clusters$detached[i] = FALSE
-    clusters$inds[[i]] <- cluster$inds
-    clusters$allInds[[i]] <- cluster$allInds
-    clusters$cen[[i]] <- cluster$cen
-    clusters$cRank[i] <- cluster$cRank
-    clusters$cRankPrev[i] <- cluster$cRank
+    seedCluster <- calcSeedCluster(tconf, seeds, i)
+    seedClusterList[[i]] <- seedCluster
   }
-  return(clusters)
+  cens <- as.data.frame(do.call(rbind, lapply(seedClusterList, function(a) {a$cen})))
+  cRank <- sapply(seedClusterList, function(a) {a$cRank})
+  objs <- as.data.frame(cbind(x=unlist(cens$x), y=unlist(cens$y), cRank, cRankPrev=cRank))
+  seedClusters <- list(
+    inds = lapply(seedClusterList, function(a) {a$inds}),
+    allInds = lapply(seedClusterList, function(a) {a$allInds}),
+    objs = objs
+  )
+  return(seedClusters)
 }

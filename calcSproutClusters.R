@@ -8,44 +8,51 @@ calcSproutClusters <- function(
   isForceClustering <- FALSE
   isUpdated <- TRUE
   n <- nrow(seeds$objs)
-  for (j in 1:2000)
+  maxPasses <- n*n*n
+  for (passInd in 1:maxPasses) # Global attempts to process seed clusters.
   {
-    if (j == 1000)
-    {
-      a1 <- 1
-    }
-    if (isForceClustering)
-    {
+    if (passInd == maxPasses) # Maximal count of global iterations is reached.
+    { #  Do super-super-force clustering: We make all seed clusters as forcely detachable.
       isForceClustering <- FALSE
       for (i in 1:n)
       {
-        if (seedClusters$cRank[i] != Inf)
+        if (seedClusters$objs$cRank[i] != Inf)
         {
-          seedClusters$cRank[i] <- 0.0
+          stopifnot(seedClusters$objs$cRank[i] == 0.0)
           seedClusters$inds[[i]] <- c(i)
-          isUpdated <- TRUE
-          break
         }
       }
     }
-    else if (!isUpdated)
+    else if (isForceClustering) # Force clustrting mode is fail. Do super-force clustering:
+    { # We make one seed cluster as forcely detachable.
+      isForceClustering <- FALSE
+      seedClusters$objs$cRank[seedClusters$objs$cRank == 0.0] <-
+        seedClusters$objs$cRankPrev[seedClusters$objs$cRank == 0.0] # Revert all cRanks.
+      cRankOrder <- order(seedClusters$objs$cRank)
+      k <- cRankOrder[1]
+      stopifnot(seedClusters$objs$cRank[k] != Inf)
+      seedClusters$objs$cRank[k] <- 0.0
+      seedClusters$inds[[k]] <- c(k)
+    }
+    else if (!isUpdated) # Processing the seed clusters has no change anyting. We should enable force clustering mode.
     {
-      stopifnot(all(seedClusters$cRank == Inf | seedClusters$cRank == 0.0))
-      seedClusters$cRank[seedClusters$cRank == 0.0] <- seedClusters$cRankPrev[seedClusters$cRank == 0.0]
-      isForceClustering <- TRUE
+      stopifnot(all(seedClusters$objs$cRank == Inf | seedClusters$objs$cRank == 0.0))
+      seedClusters$objs$cRank[seedClusters$objs$cRank == 0.0] <-
+        seedClusters$objs$cRankPrev[seedClusters$objs$cRank == 0.0] # Revert all cRanks.
+      isForceClustering <- TRUE # Enable force clustering mode.
     }
     isUpdated <- FALSE
-    cRankOrder <- order(seedClusters$cRank)
+    cRankOrder <- order(seedClusters$objs$cRank)
     for (i in 1:n)
     {
       k <- cRankOrder[i]
-      if (seedClusters$cRank[k] == Inf)
+      if (seedClusters$objs$cRank[k] == Inf) # We process all uprocessed seed clusters.
       {
-        if (i == 1)
+        if (i == 1) # All seed clusters are already processed.
         {
-          return(clusters)
+          return(clusters) 
         }
-        else
+        else # We process all uprocessed seed clusters in this global iteration.
         {
           break
         }
@@ -77,55 +84,53 @@ calcSproutClusters <- function(
           newClusterPts <- seeds$objs[seedClusterInds, tconf$xyInds] # Coordinates of new cluster's points.
           newClusterWs <- seeds$w[clusterRefInd, seedClusterInds]
           newClusterCen <- calcClusterCnt(newClusterPts, newClusterWs) # Coordinates of new cluster's center.
-          seedClusters$cen[[clusterRefInd]] <- newClusterCen
+          seedClusters$objs[clusterRefInd, tconf$cenInds] <- newClusterCen
 
-          seedClusters$cRank[seedClusterInds] <- 0.0
+          seedClusters$objs$cRank[seedClusterInds] <- 0.0
           isForceClustering <- FALSE
           isUpdated <- TRUE
           break
         }
       }
-      if (seedClusters$cRank[k] == 0.0)
+      if (seedClusters$objs$cRank[k] == 0.0)
       {
         if (calcIsSeedClusterDetachable(seedClusters, seedClusterInds))
         {
           clusterCount <- clusterCount + 1
           clusters$inds[[clusterCount]] <- seedClusterInds
-          seedClusters$detached[seedClusterInds] <- TRUE
-          seedClusters$cRank[seedClusterInds] <- Inf
+          seedClusters$objs$cRank[seedClusterInds] <- Inf
           
           clusterTs <- seeds$objs$t[seedClusterInds]
           clusterRefInd <- seedClusterInds[which(clusterTs == max(clusterTs))][1]
           clusters$id[clusterCount] <- clusterCount
-          clusters$x[clusterCount] <- seedClusters$cen[[clusterRefInd]]$x
-          clusters$y[clusterCount] <- seedClusters$cen[[clusterRefInd]]$y
+          clusters$x[clusterCount] <- seedClusters$objs$x[clusterRefInd]
+          clusters$y[clusterCount] <- seedClusters$objs$y[clusterRefInd]
           clusters$t[clusterCount] <- seeds$objs$t[clusterRefInd]
           clusters$r[clusterCount] <- seeds$objs$r[clusterRefInd] # !!!! Must be changed !!!!
           
           seeds$d <- detachPoint(seeds$d, seedClusterInds)
-          for (ind in which(!seedClusters$detached))
+          for (ind in which(seedClusters$objs$cRank != Inf))
           {
             if (length(intersect(seedClusters$inds[[ind]], seedClusterInds)) != 0)
             {
-              #seedClusters <- calcSeedCluster(tconf, seeds, seedClusters, ind)
               seedCluster <- calcSeedCluster(tconf, seeds, ind)
-              seedClusters$detached[ind] = FALSE
               seedClusters$inds[[ind]] <- seedCluster$inds
               seedClusters$allInds[[ind]] <- seedCluster$allInds
-              seedClusters$cen[[ind]] <- seedCluster$cen
-              seedClusters$cRank[ind] <- seedCluster$cRank
-              seedClusters$cRankPrev[ind] <- seedCluster$cRank
+              seedClusters$objs[ind, tconf$cenInds] <- seedCluster$cen
+              seedClusters$objs$cRank[ind] <- seedCluster$cRank
+              seedClusters$objs$cRankPrev[ind] <- seedCluster$cRank
             }
             else if (length(intersect(seedClusters$allInds[[ind]], seedClusterInds)) != 0)
             {
               seedClusters$allInds[[ind]] <- setdiff(seedClusters$allInds[[ind]], seedClusterInds)
-              seedClusters$cRank[ind] <- calcConflictingRank(tconf, seeds, seedClusters$inds[[ind]],
-                                                             seedClusters$allInds[[ind]], seedClusters$cen[[ind]])
-              seedClusters$cRankPrev[ind] <- seedClusters$cRank[ind]
+              seedClusters$objs$cRank[ind] <- calcConflictingRank(tconf, seeds, seedClusters$inds[[ind]],
+                                                             seedClusters$allInds[[ind]],
+                                                             seedClusters$objs[ind,tconf$cenInds])
+              seedClusters$objs$cRankPrev[ind] <- seedClusters$objs$cRank[ind]
             }
-            else if (seedClusters$cRank[ind] == 0.0 && seedClusters$cRankPrev[ind] != 0.0)
+            else if (seedClusters$objs$cRank[ind] == 0.0 && seedClusters$objs$cRankPrev[ind] != 0.0)
             {
-              seedClusters$cRank[ind] <- seedClusters$cRankPrev[ind]
+              seedClusters$objs$cRank[ind] <- seedClusters$objs$cRankPrev[ind]
             }
           }
           isUpdated <- TRUE
@@ -134,7 +139,7 @@ calcSproutClusters <- function(
       }
       else
       {
-        seedClusters$cRank[k] <- 0.0
+        seedClusters$objs$cRank[k] <- 0.0
         isUpdated <- TRUE
         break
       }
