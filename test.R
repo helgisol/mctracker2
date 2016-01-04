@@ -25,15 +25,20 @@ source('calcUpdCluster.R')
 source('updateCoordClusters.R')
 source('calcUpdClusters.R')
 source('updateObjss.R')
+source('updateSeedCluster.R')
+source('addSproutCluster.R')
+source('calcIsIntersected.R')
+source('calcIsSubsetOf.R')
+source('updateSeedClustersCen.R')
 
 createEmptyTdata <- function()
 {
   tconf1 <<- list(
-    xyInds = c(2,3), # Point coordinate indices in observation data frame.
+    xyInds = 2:3, # Point coordinate indices in observation data frame.
     ixytrInds = 1:5,
     ixytrgInds = 1:6,
-    tftcInds = c(7,8),
-    cenInds = 1:2, # Seed cluster center coordinate indices.
+    tftcInds = 7:8,
+    cenInds = 2:3, # Seed cluster center coordinate indices.
     dRdT = 4, # Radius growth time factor for time difference correction.
     tol = 1e-3, # Tolerance for calculation of time difference between components' first times in a cluster.
     tolClusterTcDiffsMax = 1e-5, # Tolerance for mean shift process breaking.
@@ -44,7 +49,8 @@ createEmptyTdata <- function()
     groupCount = 3,
     typeIncompleteCluster = 1,
     typeNonconsistentCmp = 2,
-    typeNewObs = 3)
+    typeNewObs = 3,
+    seedClusterStatus = list(free=1, cond=2, quaziFree=3, detached=4))
   tstate1 <<- list()
   tstate1[[1]] <<- list(
     obs = NULL, # Current observations' data table.
@@ -52,12 +58,10 @@ createEmptyTdata <- function()
     cmpIds = list(),
     objs = data.frame(id=integer(),x=double(),y=double(),t=double(),r=double()),
     objss = NULL, # Cluster objects history.
-    cmpIdsUpd = NULL,
-    objsUpd = NULL,
     lastId = 0)
 }
 
-createObs <- function()
+createTestObs <- function()
 {
   obs1 <<- sampleObs()
 }
@@ -72,7 +76,7 @@ testMct <- function(iter = 1, visualize = TRUE)
   if (iter == 1)
   {
     createEmptyTdata()
-    createObs()
+    createTestObs()
   }
   processObs(iter)
   if (visualize)

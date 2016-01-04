@@ -44,5 +44,6 @@ coordinateClusters <- function(tconf, tstate, seeds, sproutClusters)
     }
     coordClusters$cmpIds[[i]] <- cmpIds
   }
+  coordClusters$lastId <- lastId
   return(coordClusters)
 }

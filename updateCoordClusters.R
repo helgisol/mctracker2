@@ -1,6 +1,6 @@
 updateCoordClusters <- function(tconf, tstate, coordClusters)
 {
-  tstate$lastId <- max(coordClusters$objs$id)
+  tstate$lastId <- coordClusters$lastId
   tstate$cmpIds <- c(tstate$cmpIds, coordClusters$cmpIds)
   tstate$objs <- rbind(tstate$objs, coordClusters$objs)
   if (nrow(tstate$objs) > 0)

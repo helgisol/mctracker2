@@ -10,7 +10,7 @@ calcSeedClusters <- function(
   }
   cens <- as.data.frame(do.call(rbind, lapply(seedClusterList, function(a) {a$cen})))
   cRank <- sapply(seedClusterList, function(a) {a$cRank})
-  objs <- as.data.frame(cbind(x=unlist(cens$x), y=unlist(cens$y), cRank, cRankPrev=cRank))
+  objs <- as.data.frame(cbind(id=(1:length(cRank)), x=unlist(cens$x), y=unlist(cens$y), cRank, cRankPrev=cRank))
   seedClusters <- list(
     inds = lapply(seedClusterList, function(a) {a$inds}),
     allInds = lapply(seedClusterList, function(a) {a$allInds}),

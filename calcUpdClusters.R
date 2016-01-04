@@ -10,10 +10,6 @@ calcUpdClusters <- function(tconf, tstate)
     updClusterList <- list()
     for (i in 1:length(tstate$cmpIds))
     {
-      if (i == 2)
-      {
-        q1 <- 1
-      }
       updClusterList[[i]] <- calcUpdCluster(tconf, tstate, tstate$cmpIds[[i]], tstate$objs[i,])
       if (all(is.na(tstate$obs$x[tstate$obs$id %in% updClusterList[[i]]$cmpIds])))
       {
