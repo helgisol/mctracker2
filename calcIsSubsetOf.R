@@ -1,4 +1,4 @@
-calcIsSubsetOf <- function(orderedSubset, orderedSet)
+calcIsSubsetOf <- function(orderedSet, orderedSubset)
 {
-  identical(intersect(orderedSet, orderedSubset), orderedSet)
+  identical(intersect(orderedSet, orderedSubset), orderedSubset)
 }

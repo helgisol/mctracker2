@@ -50,7 +50,7 @@ createEmptyTdata <- function()
     typeIncompleteCluster = 1,
     typeNonconsistentCmp = 2,
     typeNewObs = 3,
-    seedClusterStatus = list(free=1, cond=2, quaziFree=3, detached=4))
+    scStatus = list(free=1, cond=2, quaziFree=3, detached=4, freeOrQuazi=c(1,3))) # Seed cluster statuses.
   tstate1 <<- list()
   tstate1[[1]] <<- list(
     obs = NULL, # Current observations' data table.

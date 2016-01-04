@@ -1,4 +1,4 @@
-updateSeedClustersCen <- function(tconf, seedClusters, seedClusterInds)
+updateSeedClustersCen <- function(tconf, seeds, seedClusters, seedClusterInds)
 {
   ts <- seeds$objs$t[seedClusterInds]
   refPtInd <- seedClusterInds[which(ts == max(ts))][1]
