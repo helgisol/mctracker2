@@ -17,10 +17,10 @@ coordinateClusters <- function(tconf, tstate, seeds, sproutClusters)
   {
     cmpInds <- sproutClusters$inds[[i]]
     types <- seeds$objs$type[cmpInds]
-    if (tconf$typeIncompleteCluster %in% types)
+    if (tconf$sSort$incompleteCluster %in% types)
     {
       clusterObjs <- seeds$objs[cmpInds,]
-      cmpIds <- clusterObjs$id[clusterObjs$type == tconf$typeIncompleteCluster]
+      cmpIds <- clusterObjs$id[clusterObjs$type == tconf$sSort$incompleteCluster]
       coordClusters$objs$id[i] <- min(cmpIds)
     }
     else
@@ -31,7 +31,7 @@ coordinateClusters <- function(tconf, tstate, seeds, sproutClusters)
     cmpIds <- integer()
     for (cmpInd in cmpInds)
     {
-      if (seeds$objs$type[cmpInd] == tconf$typeIncompleteCluster)
+      if (seeds$objs$type[cmpInd] == tconf$sSort$incompleteCluster)
       {
         oldTstateInd <- which(tstate$objs$id == seeds$objs$id[cmpInd])
         realCmpIds <- tstate$cmpIds[[oldTstateInd]]

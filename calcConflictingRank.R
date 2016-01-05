@@ -1,17 +1,18 @@
+# Calculating a conflicting rank for a seed cluster.
 calcConflictingRank <- function(
   tconf,
   seeds,
-  clusterInds,
-  clusterAllInds,
-  clusterCen) # Coordinates of cluster center (calculated for obly closest points in cluster)
+  clusterInds, # Indices of the closest (for each group) points in the cluster.
+  clusterAllInds, # Indices of all points in the cluster.
+  clusterCen) # Coordinates of cluster center (calculated for only closest points in the cluster).
 {
   if (identical(clusterInds, clusterAllInds))
   {
-    return(0.0)
+    return(0.0) # There are not conflicting points in the cluster.
   }
   cRank <- 0.0 # Current value of resulted cRank.
-  confSingleGroups <- unique(unlist(seeds$g[clusterAllInds]))
   clusterOutInds <- setdiff(clusterAllInds, clusterInds)
+  confSingleGroups <- unique(unlist(seeds$g[clusterOutInds]))
   clusterInPts <- seeds$objs[clusterInds, tconf$xyInds]
   clusterOutPts <- seeds$objs[clusterOutInds, tconf$xyInds]
   distsIn <- calcPointDist(clusterCen, clusterInPts)
@@ -30,6 +31,10 @@ calcConflictingRank <- function(
         if (length(intersect(gOut, gIn)) > 0)
         {
           distDiff <- abs(distsOut[j] - distsIn[i])
+          if (distDiff < 1e-5 && abs(distsOut[i]) < 1e-5)
+          {
+            return(1.0)
+          }
           if (distDiff < minDistDiff)
           {
             minDistDiff <- distDiff

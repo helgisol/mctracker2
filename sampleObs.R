@@ -31,7 +31,7 @@ sampleObs <- function() # Sample of observation data for mc-tracker.
   obs4$x[obs4$id==16] <- 1.7
   obs4$x <- obs4$x + 0.05
   obs4$y <- obs4$y - 0.06
-  obs4$t <- obs4$t - 0.2
+  obs4$t <- obs4$t + 0.2
   obs4$r <- obs4$r - 0.01
 
   obs <- list(obs1, obs2, obs3, obs4)
