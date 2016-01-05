@@ -2,6 +2,7 @@
 calcConflictingRank <- function(
   tconf,
   seeds,
+  seedInd,
   clusterInds, # Indices of the closest (for each group) points in the cluster.
   clusterAllInds, # Indices of all points in the cluster.
   clusterCen) # Coordinates of cluster center (calculated for only closest points in the cluster).
@@ -13,10 +14,15 @@ calcConflictingRank <- function(
   cRank <- 0.0 # Current value of resulted cRank.
   clusterOutInds <- setdiff(clusterAllInds, clusterInds)
   confSingleGroups <- unique(unlist(seeds$g[clusterOutInds]))
-  clusterInPts <- seeds$objs[clusterInds, tconf$xyInds]
-  clusterOutPts <- seeds$objs[clusterOutInds, tconf$xyInds]
-  distsIn <- calcPointDist(clusterCen, clusterInPts)
-  distsOut <- calcPointDist(clusterCen, clusterOutPts)
+  clusterCenSeed <- seeds$objs[seedInd,]
+  clusterCenSeed[,tconf$xyInds] <- clusterCen
+  clusterInSeeds <- seeds$objs[clusterInds,]
+  clusterOutSeeds <- seeds$objs[clusterOutInds,]
+  distsIn <- calcSeedDist(tconf, clusterCenSeed, clusterInSeeds)
+  distsOut <- calcSeedDist(tconf, clusterCenSeed, clusterOutSeeds)
+  minDist <- min(distsIn)
+  distsIn <- distsIn - minDist + 1.0
+  distsOut <- distsOut - minDist + 1.0
   minDistDiff <- Inf
   for (i in 1:length(clusterInds))
   {
@@ -31,10 +37,6 @@ calcConflictingRank <- function(
         if (length(intersect(gOut, gIn)) > 0)
         {
           distDiff <- abs(distsOut[j] - distsIn[i])
-          if (distDiff < 1e-5 && abs(distsOut[i]) < 1e-5)
-          {
-            return(1.0)
-          }
           if (distDiff < minDistDiff)
           {
             minDistDiff <- distDiff

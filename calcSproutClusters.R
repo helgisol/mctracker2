@@ -25,7 +25,7 @@ calcSproutClusters <- function(tconf, seeds)
       {
         oldCrank <- seedClusters$objs$cRank[ind]
         seedClusters$allInds[[ind]] <<- setdiff(seedClusters$allInds[[ind]], seedClusterInds)
-        seedClusters$objs$cRank[ind] <<- calcConflictingRank(tconf, seeds, seedClusters$inds[[ind]],
+        seedClusters$objs$cRank[ind] <<- calcConflictingRank(tconf, seeds, ind, seedClusters$inds[[ind]],
                                                             seedClusters$allInds[[ind]],
                                                             seedClusters$objs[ind,tconf$cenInds])
         if (oldCrank != seedClusters$objs$cRank[ind])

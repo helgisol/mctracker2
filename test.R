@@ -30,8 +30,8 @@ source('addSproutCluster.R')
 source('calcIsIntersected.R')
 source('calcIsSubsetOf.R')
 source('updateSeedClustersCen.R')
-source('calcObsDist.R')
 source('calcSeedDist.R')
+source('calcClusterCmpDist.R')
 
 createEmptyTdata <- function()
 {
@@ -45,9 +45,8 @@ createEmptyTdata <- function()
     dRdT = 4, # Radius growth time factor for time difference correction.
     tol = 1e-3, # Tolerance for calculation of time difference between components' first times in a cluster.
     tolClusterTcDiffsMax = 1e-5, # Tolerance for mean shift process breaking.
-    #clusterRFactorReunion = 0.9, # Scale factor for cluster radius for re-union component treshold.
     clusterRFactorLost = 1.4, # Scale factor for cluster radius for leaving component treshold.
-    #clusterRFactorFirst = 1.1, # Scale factor for radius of the first point in cluster.
+    clusterRFactorTcMax = 1.08, # Maximal scale factor for radius of the oldest component in cluster.
     obsHistDepth = 3, # Depth of stored observation history (at least 1).
     groupCount = 3,
     sSortDistFactor = matrix(c(1.0,1.05,1.2, 1.05,1.0,1.08, 1.2,1.08,1.0),3,3), # Seed sort distance factor.

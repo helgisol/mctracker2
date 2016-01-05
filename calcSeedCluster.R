@@ -14,14 +14,14 @@ calcSeedCluster <- function(
   origMaxDist <- 2 * ri
   clusterAllInds <- c(i)
   clusterInds <- c(i)
-  clusterPts <- seeds$objs[clusterInds,tconf$xyInds]
+  #clusterPts <- seeds$objs[clusterInds,tconf$xyInds]
   clusterCen <- origPt
   clusterCenSeed <- origSeed
   repeat
   {
     origShift <- calcPointDist(origPt, clusterCen) # Distance between original point and cluster's center.
     posClusterInds <- which(seeds$d[i,] <= origShift) # Indices (in global point list) of potential cluster points.
-    posClusterPts <- seeds$objs[posClusterInds,tconf$xyInds] # Coordinates of potential cluster points.
+    #posClusterPts <- seeds$objs[posClusterInds,tconf$xyInds] # Coordinates of potential cluster points.
     posClusterCmpSeeds <- seeds$objs[posClusterInds,] # Seeds, which are potential cluster components.
     # Distances to cluster's center from all potential cluster's points.
     #dists <- calcPointDist(clusterCen, posClusterPts)
@@ -76,7 +76,7 @@ calcSeedCluster <- function(
     clusterShift <- calcPointDist(newClusterCen, clusterCen)
     clusterAllInds <- newClusterAllInds
     clusterInds <- newClusterInds
-    clusterPts <- newClusterPts
+    #clusterPts <- newClusterPts
     clusterCen <- newClusterCen
     clusterCenSeed[,tconf$xyInds] <- newClusterCen
     if (clusterShift < tconf$tol)
@@ -88,6 +88,6 @@ calcSeedCluster <- function(
     inds = as.vector(clusterInds),
     allInds = as.vector(clusterAllInds),
     cen = clusterCen,
-    cRank = calcConflictingRank(tconf, seeds, clusterInds, clusterAllInds, clusterCen))
+    cRank = calcConflictingRank(tconf, seeds, i, clusterInds, clusterAllInds, clusterCen))
   return(cluster)
 }

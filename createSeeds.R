@@ -19,13 +19,13 @@ createSeeds <- function(tconf, tstate, updClusters)
   objs <- rbind(
     cbind(
       incompleteClusterObjs,
-      type = rep(tconf$sSort$incompleteCluster, nrow(incompleteClusterObjs))),
+      s = rep(tconf$sSort$incompleteCluster, nrow(incompleteClusterObjs))),
     cbind(
       nonconsistentCmpObs,
-      type = rep(tconf$sSort$nonconsistentCmp, nrow(nonconsistentCmpObs))),
+      s = rep(tconf$sSort$nonconsistentCmp, nrow(nonconsistentCmpObs))),
     cbind(
       newObs[,tconf$ixytrInds],
-      type = rep(tconf$sSort$newObs, nrow(newObs))))
+      s = rep(tconf$sSort$newObs, nrow(newObs))))
 
   seeds <- list(
     g = c(

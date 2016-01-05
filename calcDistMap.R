@@ -8,13 +8,11 @@ calcDistMap <- function( # Distance map for all seeds. d[i,i] is filled, but dis
   {
     gi <- seeds$g[[i]]
     seedi <- seeds$objs[i,]
-    #ri <- seeds$objs$r[i]
-    #ti <- seeds$objs$t[i]
     for(j in 1:n)
     {
       if (i == j)
       {
-        dm[i,j] <- - 2.0 * ri
+        dm[i,j] <- - 2.0 * seedi$r
       }
       else if (length(intersect(gi,seeds$g[[j]])) > 0)
       {
@@ -23,9 +21,6 @@ calcDistMap <- function( # Distance map for all seeds. d[i,i] is filled, but dis
       else
       {
         seedj <- seeds$objs[j,]
-        #rj <- seeds$objs$r[j]
-        #tj <- seeds$objs$t[j]
-        #dm[i,j] <- dm[i,j] - ri - rj - tconf$dRdT * abs(tj - ti)
         dm[i,j] <- calcSeedDist(tconf, seedi, seedj)
       }
     }

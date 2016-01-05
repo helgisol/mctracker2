@@ -64,20 +64,8 @@ calcUpdCluster <- function(
           updCluster$obj <- updateClusterObj(tconf, updCluster$obj, visObsCmpIds, oldCmpObs)
           isNeedUpdateCnt <- FALSE
         }
-        oldClusterCenPt <- updCluster$obj[,tconf$xyInds]
-        oldClusterCenT <- updCluster$obj$t
-        oldClusterCenR <- updCluster$obj$r
         newVisObsCmpObs <- newCmpObs[newCmpObs$id %in% visObsCmpIds,] # Visible and observed component observations.
-        newClusterPts <- newVisObsCmpObs[,tconf$xyInds]
-        newClusterTs <- newVisObsCmpObs$t
-        newClusterRs <- newVisObsCmpObs$r
-        newClusterTcs <- newVisObsCmpObs$tc
-        minTc <- min(newCmpObs$tc)
-        newClusterTcW <- calcClusterTcWeights(tconf, newClusterTcs, minTc)
-        dists <- calcPointDist(oldClusterCenPt, newClusterPts)
-        dists <- dists - oldClusterCenR - (newClusterRs + 
-                                             tconf$dRdT * abs(newClusterTs - oldClusterCenT) *
-                                             tconf$clusterRFactorLost * newClusterTcW)
+        dists <- calcClusterCmpDist(tconf, updCluster$obj, newVisObsCmpObs)
         distOrder <- order(dists, decreasing = TRUE)
         if (dists[distOrder[1]] <= 0.0)
         {
@@ -118,21 +106,8 @@ calcUpdCluster <- function(
     if (length(invisObsCmpIds) > 0)
     {
       stopifnot(!isNeedUpdateCnt)
-      
-      oldClusterCenPt <- updCluster$obj[,tconf$xyInds]
-      oldClusterCenT <- updCluster$obj$t
-      oldClusterCenR <- updCluster$obj$r
       newInvisObsCmpObs <- newCmpObs[newCmpObs$id %in% invisObsCmpIds,] # Invisible but observed component observations.
-      newClusterPts <- newInvisObsCmpObs[,tconf$xyInds]
-      newClusterTs <- newInvisObsCmpObs$t
-      newClusterRs <- newInvisObsCmpObs$r
-      newClusterTcs <- newInvisObsCmpObs$tc
-      minTc <- min(newCmpObs$tc)
-      newClusterTcW <- calcClusterTcWeights(tconf, newClusterTcs, minTc)
-      dists <- calcPointDist(oldClusterCenPt, newClusterPts)
-      dists <- dists - oldClusterCenR - (newClusterRs + 
-                                           tconf$dRdT * abs(newClusterTs - oldClusterCenT) *
-                                           tconf$clusterRFactorLost * newClusterTcW)
+      dists <- calcClusterCmpDist(tconf, updCluster$obj, newInvisObsCmpObs)
       goodInvisObsCmpInds <- which(dists <= 0.0)
       goodInvisObsCmpIds <- invisObsCmpIds[goodInvisObsCmpInds]
       
