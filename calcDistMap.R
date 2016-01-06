@@ -21,7 +21,7 @@ calcDistMap <- function( # Distance map for all seeds. d[i,i] is filled, but dis
       else
       {
         seedj <- seeds$objs[j,]
-        dm[i,j] <- calcSeedDist(tconf, seedi, seedj)
+        dm[i,j] <- calcSeedDist(tconf, seeds$dw[i,j], seedi, seedj)
       }
     }
   }

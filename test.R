@@ -32,6 +32,9 @@ source('calcIsSubsetOf.R')
 source('updateSeedClustersCen.R')
 source('calcSeedDist.R')
 source('calcClusterCmpDist.R')
+source('calcDistWeightMap.R')
+source('calcSeedHistObj.R')
+source('calcObsDist.R')
 
 createEmptyTdata <- function()
 {
@@ -49,6 +52,7 @@ createEmptyTdata <- function()
     clusterRFactorTcMax = 1.08, # Maximal scale factor for radius of the oldest component in cluster.
     obsHistDepth = 3, # Depth of stored observation history (at least 1).
     groupCount = 3,
+    distWeightScaleFactor = 0.33, # Factor for seeed distance weight calculation (scale for change).
     sSortDistFactor = matrix(c(1.0,1.05,1.2, 1.05,1.0,1.08, 1.2,1.08,1.0),3,3), # Seed sort distance factor.
     maxTimeHistDist = 0.3, # Maximal time distance for extraction from history for seed distance calculation.
     sSort = list(incompleteCluster=1, nonconsistentCmp=2, newObs=3), # Seed sorts.

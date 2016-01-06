@@ -18,8 +18,8 @@ calcConflictingRank <- function(
   clusterCenSeed[,tconf$xyInds] <- clusterCen
   clusterInSeeds <- seeds$objs[clusterInds,]
   clusterOutSeeds <- seeds$objs[clusterOutInds,]
-  distsIn <- calcSeedDist(tconf, clusterCenSeed, clusterInSeeds)
-  distsOut <- calcSeedDist(tconf, clusterCenSeed, clusterOutSeeds)
+  distsIn <- calcSeedDist(tconf, seeds$dw[seedInd,clusterInds], clusterCenSeed, clusterInSeeds)
+  distsOut <- calcSeedDist(tconf, seeds$dw[seedInd,clusterOutInds], clusterCenSeed, clusterOutSeeds)
   minDist <- min(distsIn)
   distsIn <- distsIn - minDist + 1.0
   distsOut <- distsOut - minDist + 1.0
