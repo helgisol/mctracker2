@@ -1,7 +1,12 @@
 calcSproutClusters <- function(tconf, seeds)
 {
-  clusterCount <- 0 # Sprout cluster's counter.
   clusters <- list() # Resulted sprout clusters.
+  n <- nrow(seeds$objs)
+  if (n == 0)
+  {
+    return(clusters)
+  }
+  clusterCount <- 0 # Sprout cluster's counter.
   seedClusters <- calcSeedClusters(tconf, seeds) # Seed clusters.
   isUpdated <- FALSE # Flag for significant changes in seed cluster's structure during global iteration.
   isDetached <- FALSE # Flag for minor changes in seed cluster's structure during global iteration.
@@ -47,7 +52,6 @@ calcSproutClusters <- function(tconf, seeds)
     return(FALSE)
   }
   
-  n <- nrow(seeds$objs)
   maxPasses <- n^3
   for (passInd in 1:maxPasses) # Global attempts to process seed clusters.
   {

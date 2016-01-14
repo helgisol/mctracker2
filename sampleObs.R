@@ -1,8 +1,8 @@
 sampleObs <- function() # Sample of observation data for mc-tracker.
 {
   domain <- data.frame(
-    x=c(-0.1, -0.1, 7.4, 7.4),
-    y=c(0.55, -0.55, -0.55, 0.55))
+    x=c(-0.1, 7.4),
+    y=c(-0.55, 0.55))
   
   obs1 <- data.frame(
     id=(1:21),
@@ -45,8 +45,8 @@ sampleObs <- function() # Sample of observation data for mc-tracker.
 sampleObs2 <- function() # Simlple walking through 3 cameras.
 {
   domain <- data.frame(
-    x=c(1.6, -1.6, -1.6, 1.6),
-    y=c(1.6, 1.6, -1.6, -1.6))
+    x=c(-1.6, 1.6),
+    y=c(-1.6, 1.6))
   
   obs <- list()
   obs[[1]] <- data.frame(

@@ -4,24 +4,27 @@ calcDistMap <- function( # Distance map for all seeds. d[i,i] is filled, but dis
 {
   dm <- as.matrix(dist(seeds$objs[,tconf$xyInds]))
   n <- nrow(seeds$objs)
-  for(i in 1:n)
+  if (n > 0)
   {
-    gi <- seeds$g[[i]]
-    seedi <- seeds$objs[i,]
-    for(j in 1:n)
+    for(i in 1:n)
     {
-      if (i == j)
+      gi <- seeds$g[[i]]
+      seedi <- seeds$objs[i,]
+      for(j in 1:n)
       {
-        dm[i,j] <- - 2.0 * seedi$r
-      }
-      else if (length(intersect(gi,seeds$g[[j]])) > 0)
-      {
-        dm[i,j] <- NA
-      }
-      else
-      {
-        seedj <- seeds$objs[j,]
-        dm[i,j] <- calcSeedDist(tconf, seeds$dw[i,j], seedi, seedj)
+        if (i == j)
+        {
+          dm[i,j] <- - 2.0 * seedi$r
+        }
+        else if (length(intersect(gi,seeds$g[[j]])) > 0)
+        {
+          dm[i,j] <- NA
+        }
+        else
+        {
+          seedj <- seeds$objs[j,]
+          dm[i,j] <- calcSeedDist(tconf, seeds$dw[i,j], seedi, seedj)
+        }
       }
     }
   }
