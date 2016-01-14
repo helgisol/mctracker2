@@ -1,6 +1,6 @@
 calcSproutClusters <- function(tconf, seeds)
 {
-  clusters <- list() # Resulted sprout clusters.
+  clusters <- list(inds=list()) # Resulted sprout clusters.
   n <- nrow(seeds$objs)
   if (n == 0)
   {
@@ -33,6 +33,10 @@ calcSproutClusters <- function(tconf, seeds)
         seedClusters$objs$cRank[ind] <<- calcConflictingRank(tconf, seeds, ind, seedClusters$inds[[ind]],
                                                             seedClusters$allInds[[ind]],
                                                             seedClusters$objs[ind,tconf$cenInds])
+        if (seedClusters$objs$status[ind] != tconf$scStatus$free && seedClusters$objs$cRank[ind] == 0)
+        {
+          seedClusters$objs$status[ind] <<- tconf$scStatus$free
+        }
         if (oldCrank != seedClusters$objs$cRank[ind])
         {
           isChanged <- TRUE

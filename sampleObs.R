@@ -42,7 +42,7 @@ sampleObs <- function() # Sample of observation data for mc-tracker.
   return(list(obs=obs,domain=domain))
 }
 
-sampleObs2 <- function() # Simlple walking through 3 cameras.
+sampleObs2 <- function() # Simlple walking through 3 cameras (along circle).
 {
   domain <- data.frame(
     x=c(-1.6, 1.6),
@@ -119,5 +119,44 @@ sampleObs2 <- function() # Simlple walking through 3 cameras.
     t=c(0.8, 0.86, 0.86),
     r=c(0.5, 0.6, 0.4),
     g=c(1, 2, 3))
+  return(list(obs=obs,domain=domain))
+}
+
+
+sampleObs3 <- function() # Two persons walk towards each other.
+{
+  domain <- data.frame(
+    x=c(-2.6, 2.6),
+    y=c(-0.6, 0.6))
+  
+  obs <- list()
+  obs[[1]] <- data.frame(
+    id=c(1, 2),
+    x=c(-2.0, 2.0),
+    y=c(0.1, -0.1),
+    t=c(0.0, 0.05),
+    r=c(0.5, 0.45),
+    g=c(1, 2))
+  obs[[2]] <- data.frame(
+    id=c(1, 2),
+    x=c(-1.0, 1.0),
+    y=c(0.1, -0.1),
+    t=c(0.15, 0.1),
+    r=c(0.5, 0.45),
+    g=c(1, 2))
+  obs[[3]] <- data.frame(
+    id=c(1, 2),
+    x=c(-0.15, 0.15),
+    y=c(0.1, -0.1),
+    t=c(0.21, 0.19),
+    r=c(0.5, 0.45),
+    g=c(1, 2))
+  obs[[4]] <- data.frame(
+    id=c(1, 2, 3),
+    x=c(0.08, -0.12, 0.26),
+    y=c(0.1, -0.1, -0.1),
+    t=c(0.26, 0.27, 0.26),
+    r=c(0.5, 0.45, 0.5),
+    g=c(1, 2, 1))
   return(list(obs=obs,domain=domain))
 }

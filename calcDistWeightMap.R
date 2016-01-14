@@ -42,7 +42,7 @@ calcDistWeightMap <- function(
             {
               if (dist <= 1e-5)
               {
-                shift <- max(seeds$obj$r[i], seeds$obj$r[j])
+                shift <- abs(dist) + max(seeds$obj$r[i], seeds$obj$r[j])
                 dist <- dist + shift
                 dist2 <- dist2 + shift
               }

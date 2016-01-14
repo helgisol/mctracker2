@@ -69,26 +69,47 @@ createEmptyTdata <- function()
 
 createTestObs <- function()
 {
-  obsInfo <- sampleObs2()
+  obsInfo <- sampleObs3()
   obs1 <<- obsInfo$obs
   domain1 <<- obsInfo$domain
 }
 
 processObs <- function(iter)
 {
+  if (iter > length(obs1))
+  {
+    return(FALSE)
+  }
   tstate1[[iter+1]] <<- mct(tconf1, tstate1[[iter]], obs1[[iter]])
+  return(TRUE)
 }
 
 testMct <- function(iter = 1, visualize = TRUE)
 {
+  if (is.na(iter))
+  {
+    iter <- 1
+    repeat
+    {
+      if (!testMct(iter, visualize))
+      {
+        return(TRUE)
+      }
+      iter <- iter + 1
+    }
+  }
   if (iter == 1)
   {
     createEmptyTdata()
     createTestObs()
   }
-  processObs(iter)
+  if (!processObs(iter))
+  {
+    return(FALSE)
+  }
   if (visualize)
   {
     visualizeClusters(tstate1[[iter+1]], domain1, iter)
   }
+  return(TRUE)
 }
