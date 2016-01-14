@@ -1,4 +1,4 @@
-visualizeClusters <- function(tstate, iter)
+visualizeClusters <- function(tstate, domain, iter)
 {
   if (nrow(tstate$obs) == 0)
   {
@@ -6,8 +6,10 @@ visualizeClusters <- function(tstate, iter)
   }
   # Load library for circle drowing.
   library("plotrix")
+  # Plot domain corner points.
+  plot(domain$x, domain$y, col=tstate$obs$g, type="n", asp=1, xlab="x", ylab="y", main=paste("Iter #", iter))
   # Plot all observations as dots, colored by groups.
-  plot(tstate$obs$x, tstate$obs$y, col=tstate$obs$g, pch=20, asp=1, xlab="x", ylab="y", main=paste("Iter #", iter))
+  points(tstate$obs$x, tstate$obs$y, col=tstate$obs$g, pch=20)
   # Plot all observation IDs, colored by groups (at right).
   text(tstate$obs$x, tstate$obs$y, as.character(tstate$obs$id), pos=4, col=tstate$obs$g)
   # Plot component graph for each cluster.
